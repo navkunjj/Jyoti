@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Jyoti---a-spark-of-diwali
-=======
 # JYOTI — A Spark of Diwali
 ### A Cinematic, Interactive Indian Diwali Experience
 
