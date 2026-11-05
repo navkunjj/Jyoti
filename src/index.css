@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --midnight-teal: #102C38;
+  --deep-navy: #101B35;
+  --muted-lavender: #A99BBF;
+  --lotus-pink: #E98EAF;
+  --soft-blush: #F4C4D2;
+  --warm-ivory: #F3EAE2;
+  --diya-amber: #FDB863;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #061116;
+  color: #F3EAE2;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+  background-color: #061116;
+  color: #F3EAE2;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09171e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1b3d4d;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E98EAF;
+}
+
+/* Atmospheric Glow Utilities */
+.diya-shadow-glow {
+  box-shadow: 0 0 45px 12px rgba(253, 184, 99, 0.35),
+              0 0 90px 30px rgba(233, 142, 175, 0.15);
+}
+
+.lotus-glow {
+  filter: drop-shadow(0 0 12px rgba(233, 142, 175, 0.45));
+}
+
+.text-gradient-lotus {
+  background: linear-gradient(135deg, #F3EAE2 20%, #F4C4D2 60%, #E98EAF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFF8E7 20%, #FFE29A 60%, #FDB863 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-twilight {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F3EAE2 50%, #A99BBF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle traditional noise texture */
+.bg-noise {
+  background-image: radial-gradient(rgba(243, 234, 226, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Arch mask utility */
+.clip-arch {
+  clip-path: ellipse(50% 65% at 50% 35%);
+}
+
+/* Indian Jharokha window silhouette */
+.jharokha-border {
+  border-image: linear-gradient(to bottom, #A99BBF, #E98EAF, #102C38) 1;
+}
+
+/* Flame animation */
+@keyframes flamePuff {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.9; }
+  50% { transform: scale(1.08, 0.94) translate(-1px, -2px); opacity: 1; }
+  100% { transform: scale(0.96, 1.05) translate(1px, 1px); opacity: 0.9; }
+}
+
+.animate-flame {
+  animation: flamePuff 2.5s infinite ease-in-out alternate;
+  transform-origin: bottom center;
+}
+
