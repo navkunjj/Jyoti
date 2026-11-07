@@ -117,7 +117,7 @@ export function App() {
 
       {/* Spacer that allows the page to slide up and reveal the stuck footer */}
       <div
-        style={{ height: footerHeight ? `${footerHeight}px` : '100vh' }}
+        style={{ height: footerHeight ? `${footerHeight}px` : '220px' }}
         className="w-full pointer-events-none"
         aria-hidden="true"
       />
