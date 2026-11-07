@@ -29,7 +29,7 @@ export const WishesSection: React.FC = () => {
   return (
     <section
       id="wishes"
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
+      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22]/85 via-[#061116]/85 to-[#040C10]/90 backdrop-blur-[1px] overflow-hidden select-none"
       aria-label="Chapter 05 Send Wishes and Blessings"
     >
       {/* Sky Lanterns Animation Layer */}

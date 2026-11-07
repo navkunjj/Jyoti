@@ -73,7 +73,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
     <footer
       id="site-footer"
       ref={footerRef}
-      className="fixed bottom-0 left-0 right-0 z-0 w-full bg-[#040C10] text-white py-10 sm:py-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden font-sans not-italic"
+      className="fixed bottom-0 left-0 right-0 z-0 w-full bg-[#040C10]/95 backdrop-blur-md text-white py-10 sm:py-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden font-sans not-italic"
     >
       <div className="max-w-7xl mx-auto w-full relative z-10 space-y-6">
         {/* Main Row: Brand, Navigation & Back to Top */}

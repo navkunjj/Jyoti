@@ -107,7 +107,7 @@ export const HorizontalRegionsSection: React.FC = () => {
     <section
       id="across-india"
       ref={containerRef}
-      className="relative w-full bg-[#061116] overflow-hidden select-none py-16 md:py-0"
+      className="relative w-full bg-[#061116]/85 backdrop-blur-[1px] overflow-hidden select-none py-16 md:py-0"
       aria-label="Chapter 03 Diwali Across India"
     >
       {/* Intro Header: Pure refined editorial */}

@@ -12,6 +12,7 @@ import { CelebrationSection } from './components/Celebration/CelebrationSection'
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
 import { FireworksCanvas, useScrollFireworks } from './fireworks';
+import { GlobalBackground } from './effects/background';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -85,6 +86,9 @@ export function App() {
 
   return (
     <div className="relative min-h-screen bg-[#061116] text-[#F3EAE2] overflow-x-hidden selection:bg-[#E98EAF]/30 selection:text-[#F3EAE2]">
+      {/* 0. Continuous Scroll-Reactive Abstract Background System */}
+      <GlobalBackground activeSection={activeChapter} />
+
       {/* Shared Fullscreen Fireworks Canvas (Automatic scroll-driven, pointer-events: none) */}
       <FireworksCanvas />
 
@@ -98,7 +102,7 @@ export function App() {
       />
 
       {/* 3. Main Storytelling Chapters (The Page that slides up) */}
-      <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
+      <main className="relative z-10 bg-[#061116]/80 shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
         {/* Chapter 01 — Welcome Hero */}
         <HeroSection onBeginJourney={() => handleNavigate('art')} />
 

@@ -89,7 +89,7 @@ export const CelebrationSection: React.FC = () => {
     <section
       id="celebration"
       ref={containerRef}
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#102C38] via-[#061116] to-[#0A1B22] overflow-hidden select-none"
+      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#102C38]/85 via-[#061116]/85 to-[#0A1B22]/85 backdrop-blur-[1px] overflow-hidden select-none"
       aria-label="Chapter 04 The Celebration"
     >
       {/* Decorative Rangoli Pattern Watermarks */}
