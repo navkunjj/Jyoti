@@ -223,7 +223,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         </p>
 
         {/* Primary Action Button */}
-        <div className="hero-cta flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="hero-cta flex items-center justify-center">
           <button
             onClick={onBeginJourney}
             className="group relative inline-flex items-center space-x-3 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#E98EAF] via-[#F4C4D2] to-[#FFE29A] text-[#061116] font-medium text-xs sm:text-sm uppercase tracking-[0.22em] shadow-[0_0_25px_rgba(233,142,175,0.4)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(253,184,99,0.7)] hover:scale-105 focus:outline-none"
@@ -232,15 +232,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
             <span className="transition-transform duration-300 group-hover:translate-x-1.5 font-bold">
               →
             </span>
-          </button>
-
-          {/* Diya status indicator */}
-          <button
-            onClick={handleDiyaClick}
-            className="px-5 py-3 rounded-full border border-[#A99BBF]/40 hover:border-[#E98EAF] bg-[#061116]/60 backdrop-blur-sm text-[#F3EAE2] text-xs uppercase tracking-[0.18em] transition-all flex items-center space-x-2 focus:outline-none"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#FDB863]" />
-            <span>{diyaLit ? "Sacred Diya is Glowing" : "Light Sacred Diya"}</span>
           </button>
         </div>
       </div>

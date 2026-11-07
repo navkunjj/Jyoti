@@ -184,7 +184,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
               }}
               className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#E98EAF] to-[#FDB863] text-[#061116] font-medium uppercase tracking-[0.2em] text-xs shadow-lg"
             >
-              Send Diwali Wishes ✨
+              Send Diwali Wishes
             </button>
           </div>
         </div>
