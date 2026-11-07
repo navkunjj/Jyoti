@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Cooldown tracking to prevent rapid duplicate triggers
 const triggerTimestamps: Record<string, number> = {};
-const COOLDOWN_MS = 6000;
+const COOLDOWN_MS = 2500;
 
 function canTrigger(sectionKey: string): boolean {
   const now = Date.now();
@@ -25,19 +25,15 @@ export function triggerHeroFireworks(): void {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
-  // Graceful distant rocket launch over the right-side palace ghats
+  // Graceful distant chrysanthemum over the right-side palace ghats
   setTimeout(() => {
-    fireworks.launch({
-      startX: w * 0.72 + (Math.random() - 0.5) * 40,
-      targetX: w * 0.75,
-      targetY: h * 0.22,
+    fireworks.burst(w * 0.72, h * 0.24, {
       color: PALETTE.lotusPink,
       secondaryColor: PALETTE.warmGold,
       type: 'chrysanthemum',
-      particleCount: 80,
-      speed: 1.0,
+      particleCount: 85,
     });
-  }, 800);
+  }, 400);
 }
 
 export function triggerArtFireworks(): void {
@@ -61,7 +57,7 @@ export function triggerArtFireworks(): void {
       type: 'willow',
       particleCount: 85,
     });
-  }, 500);
+  }, 400);
 }
 
 export function triggerRegionFireworks(regionIdx: number): void {
@@ -72,16 +68,20 @@ export function triggerRegionFireworks(regionIdx: number): void {
   const h = window.innerHeight;
 
   if (regionIdx === 0) {
-    // Ayodhya: Golden Deepotsav rockets
-    fireworks.launch({
-      startX: w * 0.45,
-      targetX: w * 0.48,
-      targetY: h * 0.2,
+    // Ayodhya: Golden Deepotsav cracker burst
+    fireworks.burst(w * 0.48, h * 0.24, {
       color: PALETTE.warmGold,
       secondaryColor: PALETTE.diyaAmber,
       type: 'chrysanthemum',
       particleCount: 95,
     });
+    setTimeout(() => {
+      fireworks.burst(w * 0.52, h * 0.28, {
+        color: PALETTE.coolWhite,
+        type: 'crackler',
+        particleCount: 70,
+      });
+    }, 300);
   } else if (regionIdx === 1) {
     // Varanasi: Dev Deepawali ghat river burst
     fireworks.burst(w * 0.65, h * 0.25, {
@@ -115,28 +115,22 @@ export function triggerCelebrationFireworks(): void {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
-  // Dual celebratory rocket barrage
-  fireworks.launch({
-    startX: w * 0.28,
-    targetX: w * 0.32,
-    targetY: h * 0.2,
+  // Dual celebratory burst
+  fireworks.burst(w * 0.32, h * 0.24, {
     color: PALETTE.electricPink,
     secondaryColor: PALETTE.starlightIvory,
-    type: 'chrysanthemum',
+    type: 'peony',
     particleCount: 85,
   });
 
   setTimeout(() => {
-    fireworks.launch({
-      startX: w * 0.72,
-      targetX: w * 0.68,
-      targetY: h * 0.22,
+    fireworks.burst(w * 0.68, h * 0.26, {
       color: PALETTE.warmGold,
       secondaryColor: PALETTE.diyaAmber,
       type: 'willow',
       particleCount: 95,
     });
-  }, 450);
+  }, 350);
 }
 
 export function triggerWishesFireworks(): void {
@@ -226,3 +220,4 @@ export function setupScrollFireworks(): () => void {
     triggers.forEach((t) => t.kill());
   };
 }
+

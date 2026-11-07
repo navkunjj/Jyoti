@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { fireworks } from './engine';
 import { setupScrollFireworks } from './sequences';
+import { scrollCrackerDirector } from './scrollCrackers';
 
 export const FireworksCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -12,8 +13,9 @@ export const FireworksCanvas: React.FC = () => {
     // Initialize fireworks engine
     fireworks.init(canvas);
 
-    // Setup scroll triggers
+    // Setup section scroll triggers and continuous automatic scroll cracker director
     const cleanupTriggers = setupScrollFireworks();
+    const cleanupScrollCrackers = scrollCrackerDirector.start();
 
     const handleResize = () => {
       fireworks.resize();
@@ -23,6 +25,7 @@ export const FireworksCanvas: React.FC = () => {
 
     return () => {
       cleanupTriggers();
+      cleanupScrollCrackers();
       window.removeEventListener('resize', handleResize);
       fireworks.destroy();
     };
@@ -36,3 +39,4 @@ export const FireworksCanvas: React.FC = () => {
     />
   );
 };
+

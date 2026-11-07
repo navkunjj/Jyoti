@@ -296,3 +296,4 @@ export class EmitterManager {
     return emitter;
   }
 }
+

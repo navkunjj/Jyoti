@@ -11,7 +11,6 @@ import { HorizontalRegionsSection } from './components/AcrossIndia/HorizontalReg
 import { CelebrationSection } from './components/Celebration/CelebrationSection';
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
-import { CrackerRocket } from './components/Rocket/CrackerRocket';
 import { FireworksCanvas, FireworksDebugPanel } from './fireworks';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -81,9 +80,6 @@ export function App() {
 
       {/* Development Debug HUD */}
       <FireworksDebugPanel />
-
-      {/* Interactive Diwali Cracker Rocket */}
-      <CrackerRocket />
 
       {/* 1. Floating Top Navigation Bar */}
       <Navbar onNavigate={handleNavigate} activeSection={activeChapter} />

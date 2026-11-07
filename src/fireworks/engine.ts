@@ -256,27 +256,32 @@ export class FireworksEngine {
   public burst(x: number, y: number, options: BurstOptions = {}): void {
     if (this.config.reducedMotion) return;
 
+    const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+    const worldX = options.isWorldCoord ? x : x + scrollX;
+    const worldY = options.isWorldCoord ? y : y + scrollY;
+
     const type = options.type || 'chrysanthemum';
     const budgetCount = Math.floor((options.particleCount ?? 85) * this.config.particleBudgetScale);
     const burstOpts: BurstOptions = { ...options, particleCount: budgetCount };
 
     // Play burst sound
     const size = (budgetCount > 100) ? 'large' : (budgetCount > 60 ? 'medium' : 'small');
-    fireworksAudio.playBurst(x, size);
+    fireworksAudio.playBurst(worldX - scrollX, size);
 
     if (type === 'peony') {
-      this.emitters.createPeony(this.spawnParticle, x, y, burstOpts);
+      this.emitters.createPeony(this.spawnParticle, worldX, worldY, burstOpts);
     } else if (type === 'willow') {
-      this.emitters.createWillow(this.spawnParticle, x, y, burstOpts);
-      setTimeout(() => fireworksAudio.playCrackles(x), 900);
+      this.emitters.createWillow(this.spawnParticle, worldX, worldY, burstOpts);
+      setTimeout(() => fireworksAudio.playCrackles(worldX - scrollX), 900);
     } else if (type === 'crackler') {
-      this.emitters.createCrackler(this.spawnParticle, x, y, burstOpts);
-      fireworksAudio.playCrackles(x);
+      this.emitters.createCrackler(this.spawnParticle, worldX, worldY, burstOpts);
+      fireworksAudio.playCrackles(worldX - scrollX);
     } else {
       // Default chrysanthemum
-      this.emitters.createChrysanthemum(this.spawnParticle, x, y, burstOpts);
+      this.emitters.createChrysanthemum(this.spawnParticle, worldX, worldY, burstOpts);
       if (Math.random() < 0.5) {
-        setTimeout(() => fireworksAudio.playCrackles(x), 800);
+        setTimeout(() => fireworksAudio.playCrackles(worldX - scrollX), 800);
       }
     }
   }
@@ -284,15 +289,25 @@ export class FireworksEngine {
   // 3. Ignite a Sparkler (Phuljhari)
   public sparkler(x: number, y: number, options: SparklerOptions = {}): void {
     if (this.config.reducedMotion) return;
+    const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+    const worldX = options.isWorldCoord ? x : x + scrollX;
+    const worldY = options.isWorldCoord ? y : y + scrollY;
+
     fireworksAudio.playSparklerSizzle();
-    this.emitters.startSparkler(x, y, options);
+    this.emitters.startSparkler(worldX, worldY, options);
   }
 
   // 4. Ignite a Fountain (Anar)
   public fountain(x: number, y: number, options: FountainOptions = {}): void {
     if (this.config.reducedMotion) return;
+    const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+    const worldX = options.isWorldCoord ? x : x + scrollX;
+    const worldY = options.isWorldCoord ? y : y + scrollY;
+
     fireworksAudio.playSparklerSizzle();
-    this.emitters.startAnar(x, y, options);
+    this.emitters.startAnar(worldX, worldY, options);
   }
 
   // 5. Ambient Scheduler
@@ -328,25 +343,15 @@ export class FireworksEngine {
     const x = width * 0.15 + Math.random() * width * 0.7;
     const y = height * (0.15 + Math.random() * 0.25);
 
-    // Random choice: either rocket launch or gentle high-altitude distant burst
-    if (Math.random() < 0.6) {
-      this.launch({
-        startX: x + (Math.random() - 0.5) * 60,
-        targetX: x,
-        targetY: y,
-        speed: 0.95,
-        particleCount: Math.floor(65 * this.config.particleBudgetScale),
-      });
-    } else {
-      const [col1, col2] = getRandomAerialPair();
-      this.burst(x, y, {
-        color: col1,
-        secondaryColor: col2,
-        type: Math.random() < 0.5 ? 'peony' : 'willow',
-        particleCount: Math.floor(60 * this.config.particleBudgetScale),
-        velocityScale: 3.5,
-      });
-    }
+    const [col1, col2] = getRandomAerialPair();
+    const type: FireworkType = Math.random() < 0.4 ? 'chrysanthemum' : (Math.random() < 0.5 ? 'peony' : 'willow');
+    this.burst(x, y, {
+      color: col1,
+      secondaryColor: col2,
+      type,
+      particleCount: Math.floor(65 * this.config.particleBudgetScale),
+      velocityScale: 3.6,
+    });
   }
 
   // 6. Set Intensity
@@ -399,6 +404,10 @@ export class FireworksEngine {
       // Additive blending for fireworks sparks
       this.ctx.globalCompositeOperation = 'lighter';
 
+      // Read current scroll coordinates once per frame
+      const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+      const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+
       // 1. Update & Draw Rockets
       for (let i = this.activeRockets.length - 1; i >= 0; i--) {
         const r = this.activeRockets[i];
@@ -418,7 +427,7 @@ export class FireworksEngine {
       for (let i = this.activeParticles.length - 1; i >= 0; i--) {
         const p = this.activeParticles[i];
         if (p.update()) {
-          p.draw(this.ctx);
+          p.draw(this.ctx, scrollX, scrollY);
         } else {
           // If particle died and has secondary crackles
           if (p.hasCrackles && Math.random() < 0.35 && this.activeParticles.length < this.config.maxParticles - 20) {
@@ -457,3 +466,4 @@ export class FireworksEngine {
 }
 
 export const fireworks = new FireworksEngine();
+

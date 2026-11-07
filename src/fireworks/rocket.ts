@@ -152,3 +152,4 @@ export class Rocket {
     this.onTrailSpark = null;
   }
 }
+

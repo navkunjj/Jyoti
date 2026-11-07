@@ -39,12 +39,14 @@ export interface BurstOptions {
   hasCrackles?: boolean;
   velocityScale?: number;
   trailLength?: number;
+  isWorldCoord?: boolean;
 }
 
 export interface SparklerOptions {
   durationMs?: number;
   intensity?: number;
   color?: string | FireworkColor;
+  isWorldCoord?: boolean;
 }
 
 export interface FountainOptions {
@@ -53,6 +55,7 @@ export interface FountainOptions {
   spread?: number;
   color?: string | FireworkColor;
   secondaryColor?: string | FireworkColor;
+  isWorldCoord?: boolean;
 }
 
 export interface FireworksConfig {
@@ -71,3 +74,4 @@ export interface EngineStats {
   fps: number;
   poolAvailable: number;
 }
+

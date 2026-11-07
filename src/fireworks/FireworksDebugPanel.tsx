@@ -47,15 +47,13 @@ export const FireworksDebugPanel: React.FC = () => {
     fireworks.ambient(next);
   };
 
-  const triggerType = (type: 'rocket' | 'peony' | 'chrysanthemum' | 'willow' | 'crackler' | 'phuljhari' | 'anar') => {
+  const triggerType = (type: 'peony' | 'chrysanthemum' | 'willow' | 'crackler' | 'phuljhari' | 'anar') => {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const cx = w * 0.5;
     const cy = h * 0.35;
 
-    if (type === 'rocket') {
-      fireworks.launch();
-    } else if (type === 'peony') {
+    if (type === 'peony') {
       fireworks.burst(cx + (Math.random() - 0.5) * 200, cy, { type: 'peony' });
     } else if (type === 'chrysanthemum') {
       fireworks.burst(cx + (Math.random() - 0.5) * 200, cy, { type: 'chrysanthemum' });
@@ -115,9 +113,9 @@ export const FireworksDebugPanel: React.FC = () => {
               </strong>
             </div>
             <div>
-              <span className="text-[#A99BBF] block">Rockets</span>
+              <span className="text-[#A99BBF] block">Emitters</span>
               <strong className="text-[#FFE29A] text-xs">
-                {stats.activeRockets}
+                {stats.activeEmitters}
               </strong>
             </div>
           </div>
@@ -128,12 +126,6 @@ export const FireworksDebugPanel: React.FC = () => {
               Individual Types
             </span>
             <div className="grid grid-cols-2 gap-1.5">
-              <button
-                onClick={() => triggerType('rocket')}
-                className="px-2.5 py-1.5 rounded-lg bg-[#102C38]/80 hover:bg-[#102C38] border border-[#A99BBF]/30 text-left hover:border-[#E98EAF] transition-colors"
-              >
-                🚀 Rocket Launch
-              </button>
               <button
                 onClick={() => triggerType('chrysanthemum')}
                 className="px-2.5 py-1.5 rounded-lg bg-[#102C38]/80 hover:bg-[#102C38] border border-[#A99BBF]/30 text-left hover:border-[#E98EAF] transition-colors"
@@ -166,9 +158,9 @@ export const FireworksDebugPanel: React.FC = () => {
               </button>
               <button
                 onClick={() => triggerType('crackler')}
-                className="col-span-2 px-2.5 py-1.5 rounded-lg bg-[#102C38]/80 hover:bg-[#102C38] border border-[#A99BBF]/30 text-left hover:border-[#E98EAF] transition-colors"
+                className="px-2.5 py-1.5 rounded-lg bg-[#102C38]/80 hover:bg-[#102C38] border border-[#A99BBF]/30 text-left hover:border-[#E98EAF] transition-colors"
               >
-                ⚡ Crackling Starburst
+                ⚡ Crackling Ladi
               </button>
             </div>
           </div>
@@ -290,3 +282,4 @@ export const FireworksDebugPanel: React.FC = () => {
     </div>
   );
 };
+

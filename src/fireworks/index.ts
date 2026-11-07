@@ -6,5 +6,7 @@ export * from './emitter';
 export * from './audio';
 export * from './engine';
 export * from './sequences';
+export * from './scrollCrackers';
 export * from './FireworksCanvas';
 export * from './FireworksDebugPanel';
+

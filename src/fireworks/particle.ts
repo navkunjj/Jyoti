@@ -114,8 +114,21 @@ export class Particle {
     return true;
   }
 
-  public draw(ctx: CanvasRenderingContext2D): void {
+  public draw(ctx: CanvasRenderingContext2D, scrollX: number = 0, scrollY: number = 0): void {
     if (!this.inUse || this.trailFilled < 1) return;
+
+    const drawX = this.x - scrollX;
+    const drawY = this.y - scrollY;
+
+    // Viewport culling optimization: don't draw if particle is off-screen
+    if (
+      drawY < -120 ||
+      drawY > (typeof window !== 'undefined' ? window.innerHeight + 120 : 1200) ||
+      drawX < -120 ||
+      drawX > (typeof window !== 'undefined' ? window.innerWidth + 120 : 2000)
+    ) {
+      return;
+    }
 
     const progress = 1 - this.life / this.maxLife; // 0 to 1
     let alpha = 1 - progress;
@@ -131,17 +144,17 @@ export class Particle {
       currentColor = this.secondaryColor;
     }
 
-    // Draw high-speed light streak / trail
+    // Draw high-speed light streak / trail in world space offset by scroll
     const prevIdx = (this.trailIndex - 1 + this.trailLength) % this.trailLength;
-    const prevX = this.trailX[prevIdx];
-    const prevY = this.trailY[prevIdx];
+    const prevX = this.trailX[prevIdx] - scrollX;
+    const prevY = this.trailY[prevIdx] - scrollY;
 
     const currentSize = Math.max(0.6, this.size * (1 - progress * 0.5));
 
     // Fast light trail line
     ctx.beginPath();
     ctx.moveTo(prevX, prevY);
-    ctx.lineTo(this.x, this.y);
+    ctx.lineTo(drawX, drawY);
     ctx.strokeStyle = rgbaString(currentColor, alpha * 0.85);
     ctx.lineWidth = currentSize;
     ctx.lineCap = 'round';
@@ -149,7 +162,7 @@ export class Particle {
 
     // Bright core spark head
     ctx.beginPath();
-    ctx.arc(this.x, this.y, currentSize * 0.75, 0, Math.PI * 2);
+    ctx.arc(drawX, drawY, currentSize * 0.75, 0, Math.PI * 2);
     // Core is slightly brighter/whiter
     ctx.fillStyle = rgbaString(currentColor, alpha);
     ctx.fill();
@@ -157,7 +170,7 @@ export class Particle {
     // High brightness initial flash for young particles
     if (progress < 0.15) {
       ctx.beginPath();
-      ctx.arc(this.x, this.y, currentSize * 1.8, 0, Math.PI * 2);
+      ctx.arc(drawX, drawY, currentSize * 1.8, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255, 255, 255, ${(0.6 * (1 - progress / 0.15)).toFixed(2)})`;
       ctx.fill();
     }
@@ -168,3 +181,4 @@ export class Particle {
     this.trailFilled = 0;
   }
 }
+

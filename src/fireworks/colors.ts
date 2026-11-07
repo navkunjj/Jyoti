@@ -93,3 +93,4 @@ export function rgbaString(c: FireworkColor, alpha: number): string {
   const safeAlpha = Math.max(0, Math.min(1, alpha));
   return `rgba(${c.r},${c.g},${c.b},${safeAlpha.toFixed(3)})`;
 }
+
