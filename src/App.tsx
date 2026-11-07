@@ -6,13 +6,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from './components/Navigation/Navbar';
 import { LeftChapterNav } from './components/ChapterNav/LeftChapterNav';
 import { HeroSection } from './components/Hero/HeroSection';
-import { ArtSection } from './components/ArtOfDiwali/ArtSection';
 import { HorizontalRegionsSection } from './components/AcrossIndia/HorizontalRegionsSection';
 import { CelebrationSection } from './components/Celebration/CelebrationSection';
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
 import { FireworksCanvas, useScrollFireworks } from './fireworks';
-import { GlobalBackground } from './effects/background';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -45,7 +43,7 @@ export function App() {
     gsap.ticker.lagSmoothing(0);
 
     // 2. Set up ScrollTriggers for active chapter tracking
-    const sections = ['welcome', 'art', 'across-india', 'celebration', 'wishes'];
+    const sections = ['welcome', 'across-india', 'celebration', 'wishes'];
 
     sections.forEach((id) => {
       const el = document.getElementById(id);
@@ -86,9 +84,6 @@ export function App() {
 
   return (
     <div className="relative min-h-screen bg-[#061116] text-[#F3EAE2] overflow-x-hidden selection:bg-[#E98EAF]/30 selection:text-[#F3EAE2]">
-      {/* 0. Continuous Scroll-Reactive Abstract Background System */}
-      <GlobalBackground activeSection={activeChapter} />
-
       {/* Shared Fullscreen Fireworks Canvas (Automatic scroll-driven, pointer-events: none) */}
       <FireworksCanvas />
 
@@ -102,20 +97,17 @@ export function App() {
       />
 
       {/* 3. Main Storytelling Chapters (The Page that slides up) */}
-      <main className="relative z-10 bg-[#061116]/80 shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
+      <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
         {/* Chapter 01 — Welcome Hero */}
-        <HeroSection onBeginJourney={() => handleNavigate('art')} />
+        <HeroSection onBeginJourney={() => handleNavigate('across-india')} />
 
-        {/* Chapter 02 — The Art of Diwali */}
-        <ArtSection />
-
-        {/* Chapter 03 — Diwali Across India (Pinned Horizontal Scroll) */}
+        {/* Chapter 02 — Traditions Across India */}
         <HorizontalRegionsSection />
 
-        {/* Chapter 04 — The Celebration (Emotions & Rituals) */}
+        {/* Chapter 03 — The Celebration (Emotions & Rituals) */}
         <CelebrationSection />
 
-        {/* Chapter 05 — Send Wishes & Interactive Diya */}
+        {/* Chapter 04 — Send Wishes & Interactive Diya */}
         <WishesSection />
       </main>
 

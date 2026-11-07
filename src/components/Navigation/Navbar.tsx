@@ -28,7 +28,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
 
   const navLinks = [
     { id: 'welcome', label: 'Home' },
-    { id: 'art', label: 'Traditions' },
     { id: 'across-india', label: 'Across India' },
     { id: 'celebration', label: 'Stories' },
     { id: 'wishes', label: 'Wishes' },

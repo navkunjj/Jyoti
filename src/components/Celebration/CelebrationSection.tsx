@@ -89,8 +89,8 @@ export const CelebrationSection: React.FC = () => {
     <section
       id="celebration"
       ref={containerRef}
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#102C38]/85 via-[#061116]/85 to-[#0A1B22]/85 backdrop-blur-[1px] overflow-hidden select-none"
-      aria-label="Chapter 04 The Celebration"
+      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#102C38] via-[#061116] to-[#0A1B22] overflow-hidden select-none"
+      aria-label="Chapter 03 The Celebration"
     >
       {/* Decorative Rangoli Pattern Watermarks */}
       <div className="absolute top-1/4 -right-40 pointer-events-none opacity-10">
@@ -104,7 +104,7 @@ export const CelebrationSection: React.FC = () => {
         {/* Editorial Section Header */}
         <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-20 sm:mb-28">
           <span className="text-xs uppercase tracking-[0.35em] text-[#E98EAF] font-medium block mb-3">
-            Chapter 04 · Human Emotions
+            Chapter 03 · Human Emotions
           </span>
 
           <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#F3EAE2] tracking-wide mb-4">

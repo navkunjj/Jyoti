@@ -129,7 +129,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
           ref={bgImageRef}
           src="/assets/hero-diwali-reference.jpg"
           alt="Atmospheric Diwali celebration by riverside palace ghats under twilight"
-          className="w-full h-full object-cover object-center pointer-events-none opacity-80"
+          className="w-full h-full object-cover object-center pointer-events-none"
         />
 
         {/* Atmospheric contrast overlays to guarantee high editorial readability */}

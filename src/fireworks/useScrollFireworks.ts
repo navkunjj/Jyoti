@@ -33,19 +33,19 @@ export function useScrollFireworks() {
     // 2. Choreographed Storytelling Triggers via GSAP ScrollTrigger
     const triggers: ScrollTrigger[] = [];
 
-    // A. Hero -> Art Section Transition
-    const artSection = document.getElementById('art');
-    if (artSection) {
+    // A. Hero -> Across India Section Transition
+    const acrossIndiaSection = document.getElementById('across-india');
+    if (acrossIndiaSection) {
       triggers.push(
         ScrollTrigger.create({
-          trigger: artSection,
+          trigger: acrossIndiaSection,
           start: 'top 75%',
           onEnter: () => {
             const now = Date.now();
             if (now - lastBurstTime.current > 1400) {
               lastBurstTime.current = now;
-              // Auspicious weeping golden willow over the art chapter
-              fireworks.burstInSection('art', 0.5, 0.18, {
+              // Auspicious weeping golden willow over the regional traditions chapter
+              fireworks.burstInSection('across-india', 0.5, 0.18, {
                 type: 'willow',
                 color: PALETTE.warmGold,
                 secondaryColor: PALETTE.diyaAmber,
@@ -71,10 +71,9 @@ export function useScrollFireworks() {
       );
     }
 
-    // B. Across India Horizontal Section: Direction-Aware Fireworks
-    const acrossIndiaSection = document.getElementById('across-india');
+    // B. Across India Section: Direction-Aware Stacking Deck Fireworks
     if (acrossIndiaSection) {
-      // Find region cards within horizontal section
+      // Find region cards within the section
       const regionCards = acrossIndiaSection.querySelectorAll('article');
 
       triggers.push(

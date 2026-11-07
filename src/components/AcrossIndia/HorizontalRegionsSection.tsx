@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { RegionalCelebration } from '../../types';
@@ -7,7 +7,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const HorizontalRegionsSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
+  const cardsRef = useRef<(HTMLElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const regions: RegionalCelebration[] = [
     {
@@ -77,115 +78,246 @@ export const HorizontalRegionsSection: React.FC = () => {
   ];
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const isDesktop = window.innerWidth >= 768;
-    if (!isDesktop || !containerRef.current || !trackRef.current) return;
 
     const ctx = gsap.context(() => {
-      const track = trackRef.current;
-      if (!track) return;
+      const cards = cardsRef.current.filter(Boolean) as HTMLElement[];
+      const totalCards = cards.length;
+      if (totalCards <= 1) return;
 
-      const getScrollDistance = () => track.scrollWidth - window.innerWidth;
+      if (isDesktop && !prefersReducedMotion) {
+        // Desktop Experience: Pinned 3D Parallax Stacking Cards
+        // Card 0 starts in place. Each subsequent card rises from yPercent: 110 and stacks over previous card.
+        const scrollDistance = (totalCards - 1) * window.innerHeight * 0.9;
 
-      gsap.to(track, {
-        x: () => -getScrollDistance(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          pin: true,
-          scrub: 1.1,
-          start: 'top top',
-          end: () => `+=${getScrollDistance()}`,
-          invalidateOnRefresh: true,
-        },
-      });
-    }, containerRef);
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            id: 'across-india-deck',
+            trigger: container,
+            start: 'top top',
+            end: () => `+=${scrollDistance}`,
+            pin: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              const raw = self.progress * (totalCards - 1);
+              const idx = Math.min(totalCards - 1, Math.round(raw));
+              setActiveIndex(idx);
+            },
+          },
+        });
+
+        // Initialize positions: card 0 rests; cards 1..N-1 are positioned below
+        cards.forEach((card, i) => {
+          if (i > 0) {
+            gsap.set(card, { yPercent: 115, scale: 1, opacity: 0.9 });
+          }
+        });
+
+        for (let i = 1; i < totalCards; i++) {
+          const currentCard = cards[i];
+          const prevCard = cards[i - 1];
+
+          // Current card rises up to overlap previous card
+          tl.to(
+            currentCard,
+            {
+              yPercent: 0,
+              opacity: 1,
+              ease: 'power2.inOut',
+              duration: 1.2,
+            },
+            `step-${i}`
+          );
+
+          // Previous card gently scales down and dims into the background stack
+          tl.to(
+            prevCard,
+            {
+              scale: 0.94,
+              filter: 'brightness(0.35) blur(1.5px)',
+              ease: 'power2.inOut',
+              duration: 1.2,
+            },
+            `step-${i}`
+          );
+        }
+      } else {
+        // Mobile / Reduced Motion: Fluid vertical entrance reveals for each card
+        cards.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.9,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        });
+      }
+    }, container);
 
     return () => ctx.revert();
   }, [regions.length]);
+
+  const handleSelectRegion = (index: number) => {
+    setActiveIndex(index);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const st = ScrollTrigger.getById('across-india-deck');
+    if (st) {
+      const targetProgress = index / (regions.length - 1);
+      const targetScroll = st.start + targetProgress * (st.end - st.start);
+      window.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth',
+      });
+    } else {
+      const targetCard = cardsRef.current[index];
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
 
   return (
     <section
       id="across-india"
       ref={containerRef}
-      className="relative w-full bg-[#061116]/85 backdrop-blur-[1px] overflow-hidden select-none py-16 md:py-0"
-      aria-label="Chapter 03 Diwali Across India"
+      className="relative w-full bg-[#061116] text-[#F3EAE2] overflow-hidden select-none min-h-screen py-16 md:py-8 flex flex-col justify-center"
+      aria-label="Chapter 02 Traditions Across India"
     >
-      {/* Intro Header: Pure refined editorial */}
-      <div className="pt-20 pb-10 px-6 sm:px-12 max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between border-b border-[#A99BBF]/15">
-        <div>
-          <span className="text-xs uppercase tracking-[0.35em] text-[#E98EAF] font-medium block mb-2">
-            Chapter 03 · Regional Tapestry
-          </span>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#F3EAE2] font-normal">
-            Diwali Across India
-          </h2>
-        </div>
-        <p className="font-display italic text-[#FFE29A] text-sm sm:text-base mt-3 md:mt-0 max-w-md font-light leading-relaxed">
-          Four distinct regional celebrations of the victory of light, united across the subcontinent
-        </p>
-      </div>
+      {/* Background Subtle Atmosphere */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-[#E98EAF]/10 via-[#FFE29A]/5 to-transparent blur-3xl pointer-events-none" />
 
-      {/* Horizontal Track: Clean, architectural framing */}
-      <div
-        ref={trackRef}
-        className="flex flex-col md:flex-row flex-nowrap w-full md:w-max min-h-[90vh] items-center p-6 md:p-12 gap-8 md:gap-12"
-      >
-        {regions.map((region) => (
-          <article
-            key={region.id}
-            className="w-full md:w-[80vw] lg:w-[70vw] max-w-5xl h-auto md:h-[72vh] flex-shrink-0 rounded-2xl overflow-hidden border border-[#A99BBF]/20 bg-[#0A1B22]/90 shadow-2xl relative flex flex-col lg:flex-row"
-          >
-            {/* Left/Top: Clean Photography without floating stickers */}
-            <div className="relative w-full lg:w-1/2 h-64 sm:h-80 lg:h-full overflow-hidden">
-              <img
-                src={region.image}
-                alt={region.title}
-                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[#0A1B22]/90 via-transparent to-transparent pointer-events-none" />
+      <div className="max-w-7xl mx-auto w-full px-6 sm:px-12 relative z-10 flex flex-col h-full justify-between">
+        {/* Editorial Section Header */}
+        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between border-b border-[#A99BBF]/15 pb-5 gap-4">
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="w-6 h-[1px] bg-[#E98EAF]" />
+              <span className="text-[11px] uppercase tracking-[0.32em] text-[#E98EAF] font-medium">
+                Chapter 02 · Sacred Traditions
+              </span>
             </div>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#F3EAE2] font-normal leading-tight">
+              Traditions Across India
+            </h2>
+          </div>
 
-            {/* Right/Bottom: Story Narrative & Cultural Heritage */}
-            <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-between overflow-y-auto space-y-6">
-              <div className="space-y-3">
-                {/* Location & Tradition Eyebrow */}
-                <div className="text-[11px] uppercase tracking-[0.25em] text-[#E98EAF] font-medium">
-                  {region.location}
+          {/* Quick Region Switcher / Story Indicator */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {regions.map((region, idx) => {
+              const isActive = activeIndex === idx;
+              return (
+                <button
+                  key={region.id}
+                  onClick={() => handleSelectRegion(idx)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider font-sans transition-all duration-300 focus:outline-none ${
+                    isActive
+                      ? 'bg-white/15 text-white border border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                      : 'text-white/60 hover:text-white border border-transparent hover:border-white/20'
+                  }`}
+                  aria-label={`Jump to ${region.name}`}
+                >
+                  <span className="text-[10px] text-[#FFE29A] mr-1.5 font-mono">0{idx + 1}.</span>
+                  {region.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Card Deck Container */}
+        {/* On desktop: fixed-height stacking stage where cards overlap via GSAP scrub */}
+        {/* On mobile: standard vertical flow of cards */}
+        <div className="relative w-full max-w-5xl mx-auto min-h-[580px] md:h-[580px] lg:h-[580px]">
+          {regions.map((region, idx) => (
+            <article
+              key={region.id}
+              ref={(el) => (cardsRef.current[idx] = el)}
+              style={{ zIndex: 10 + idx }}
+              className="w-full h-full md:absolute md:inset-0 mb-8 md:mb-0 rounded-3xl overflow-hidden border border-[#A99BBF]/20 bg-[#0A1B22]/95 backdrop-blur-md shadow-[0_25px_60px_rgba(0,0,0,0.85)] flex flex-col lg:flex-row transition-shadow duration-500 hover:border-[#FFE29A]/30"
+            >
+              {/* Left Column: Authentic Heritage Photography */}
+              <div className="relative w-full lg:w-[48%] h-64 sm:h-72 lg:h-full overflow-hidden flex-shrink-0">
+                <img
+                  src={region.image}
+                  alt={region.title}
+                  className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[#0A1B22]/95 via-[#0A1B22]/20 to-transparent pointer-events-none" />
+
+                {/* Region Badge Pill */}
+                <div className="absolute top-5 left-5 px-3 py-1 rounded-full bg-[#061116]/80 backdrop-blur-md border border-white/20 text-[10px] uppercase tracking-[0.22em] text-white/90">
+                  {region.era}
+                </div>
+              </div>
+
+              {/* Right Column: Narrative Lore & Cultural Significance */}
+              <div className="w-full lg:w-[52%] p-6 sm:p-8 lg:p-10 flex flex-col justify-between overflow-y-auto space-y-4">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] uppercase tracking-[0.25em] text-[#E98EAF] font-medium">
+                      {region.location}
+                    </span>
+                    <span className="text-[11px] font-mono text-white/40 tracking-widest">
+                      0{idx + 1} / 0{regions.length}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-3xl sm:text-4xl text-[#F3EAE2] font-normal leading-tight">
+                    {region.name}
+                  </h3>
+
+                  <h4 className="font-display italic text-base sm:text-lg text-[#FFE29A] font-light">
+                    {region.title}
+                  </h4>
+
+                  <p className="text-xs sm:text-sm text-[#F3EAE2]/85 leading-relaxed font-light pt-1">
+                    {region.description}
+                  </p>
+
+                  {/* Sacred Scripture / Lore Quote */}
+                  <blockquote className="pt-3 border-l-2 border-[#E98EAF]/60 pl-3.5 my-2 text-xs text-[#FFE29A]/90 italic font-serif leading-relaxed">
+                    {region.quote}
+                    <cite className="block text-[10px] font-sans not-italic text-white/50 mt-1 uppercase tracking-wider">
+                      — {region.quoteSource}
+                    </cite>
+                  </blockquote>
                 </div>
 
-                <h3 className="font-serif text-3xl sm:text-4xl text-[#F3EAE2] font-normal leading-tight">
-                  {region.name}
-                </h3>
-                <h4 className="font-display italic text-base sm:text-lg text-[#F4C4D2] font-light">
-                  {region.title}
-                </h4>
-
-                <p className="text-xs sm:text-sm text-[#F3EAE2]/80 leading-relaxed font-light pt-2">
-                  {region.description}
-                </p>
-
-                {/* Cultural Lore Quote */}
-                <blockquote className="pt-3 border-t border-[#A99BBF]/15 text-xs text-[#FFE29A]/85 italic font-serif leading-relaxed">
-                  {region.quote}
-                  <cite className="block text-[10px] font-sans not-italic text-[#A99BBF] mt-1 uppercase tracking-wider">
-                    — {region.quoteSource}
-                  </cite>
-                </blockquote>
+                {/* Cultural Highlights */}
+                <div className="pt-3 border-t border-[#A99BBF]/15 text-xs text-white/70 flex flex-wrap gap-x-4 gap-y-1.5">
+                  {region.highlights.map((h, i) => (
+                    <span key={i} className="flex items-center space-x-1.5">
+                      <span className="text-[#FFE29A]">•</span>
+                      <span className="text-white/80 font-light">{h}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
-
-              {/* Minimal Key Aspects (clean typography instead of chip tags) */}
-              <div className="pt-4 border-t border-[#A99BBF]/15 text-xs text-[#A99BBF] flex flex-wrap gap-x-4 gap-y-1">
-                {region.highlights.map((h, i) => (
-                  <span key={i} className="flex items-center space-x-1.5">
-                    <span className="text-[#E98EAF]">•</span>
-                    <span className="text-[#F3EAE2]/80 font-light">{h}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
