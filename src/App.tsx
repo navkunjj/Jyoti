@@ -11,13 +11,16 @@ import { HorizontalRegionsSection } from './components/AcrossIndia/HorizontalReg
 import { CelebrationSection } from './components/Celebration/CelebrationSection';
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
-import { FireworksCanvas, FireworksDebugPanel } from './fireworks';
+import { FireworksCanvas, useScrollFireworks } from './fireworks';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function App() {
   const [activeChapter, setActiveChapter] = useState('welcome');
   const lenisRef = useRef<Lenis | null>(null);
+
+  // Initialize automated direction-aware scroll fireworks
+  useScrollFireworks();
 
   useEffect(() => {
     // 1. Initialize Lenis Smooth Scrolling
@@ -75,11 +78,8 @@ export function App() {
 
   return (
     <div className="relative min-h-screen bg-[#061116] text-[#F3EAE2] overflow-x-hidden selection:bg-[#E98EAF]/30 selection:text-[#F3EAE2]">
-      {/* Shared Fullscreen Fireworks Canvas */}
+      {/* Shared Fullscreen Fireworks Canvas (Automatic scroll-driven, pointer-events: none) */}
       <FireworksCanvas />
-
-      {/* Development Debug HUD */}
-      <FireworksDebugPanel />
 
       {/* 1. Floating Top Navigation Bar */}
       <Navbar onNavigate={handleNavigate} activeSection={activeChapter} />
@@ -115,4 +115,3 @@ export function App() {
 }
 
 export default App;
-

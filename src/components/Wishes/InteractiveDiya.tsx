@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
 import { fireworks } from '../../fireworks';
-import { Sparkles } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 interface InteractiveDiyaProps {
   onLightChange?: (isLit: boolean) => void;
@@ -30,13 +28,6 @@ export const InteractiveDiya: React.FC<InteractiveDiyaProps> = ({ onLightChange 
         color: '#FFE29A',
         secondaryColor: '#E98EAF',
         particleCount: 85,
-      });
-
-      confetti({
-        particleCount: 35,
-        spread: 55,
-        origin: { y: 0.65, x: 0.5 },
-        colors: ['#FFE29A', '#FDB863', '#E98EAF', '#F4C4D2'],
       });
     }
   };

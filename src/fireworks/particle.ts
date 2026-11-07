@@ -68,7 +68,7 @@ export class Particle {
     this.isWillow = opts.isWillow ?? false;
     this.hasCrackles = opts.hasCrackles ?? false;
 
-    // Reset trail
+    // Reset trail buffer to current coordinates
     for (let i = 0; i < 6; i++) {
       this.trailX[i] = this.x;
       this.trailY[i] = this.y;
@@ -77,10 +77,10 @@ export class Particle {
     this.trailFilled = 1;
   }
 
-  public update(): boolean {
+  public update(driftX: number = 0, driftY: number = 0): boolean {
     if (!this.inUse) return false;
 
-    // Store current position in trail ring
+    // Record trail
     this.trailX[this.trailIndex] = this.x;
     this.trailY[this.trailIndex] = this.y;
     this.trailIndex = (this.trailIndex + 1) % this.trailLength;
@@ -88,24 +88,24 @@ export class Particle {
       this.trailFilled++;
     }
 
-    // Apply drag / friction
+    // Apply drag & gravity
     this.vx *= this.drag;
     this.vy *= this.drag;
-
-    // Apply gravity
     this.vy += this.gravity;
 
-    // Willow slight air turbulence
+    // Apply scroll momentum drift (direction-aware responsiveness)
+    if (driftX !== 0) this.vx += driftX;
+    if (driftY !== 0) this.vy += driftY;
+
+    // Willow air turbulence
     if (this.isWillow) {
       this.vx += (Math.random() - 0.5) * 0.04;
     }
 
-    // Move
     this.x += this.vx;
     this.y += this.vy;
 
     this.life--;
-
     if (this.life <= 0) {
       this.inUse = false;
       return false;
@@ -120,38 +120,33 @@ export class Particle {
     const drawX = this.x - scrollX;
     const drawY = this.y - scrollY;
 
-    // Viewport culling optimization: don't draw if particle is off-screen
-    if (
-      drawY < -120 ||
-      drawY > (typeof window !== 'undefined' ? window.innerHeight + 120 : 1200) ||
-      drawX < -120 ||
-      drawX > (typeof window !== 'undefined' ? window.innerWidth + 120 : 2000)
-    ) {
+    // Viewport culling optimization
+    const vWidth = typeof window !== 'undefined' ? window.innerWidth : 1600;
+    const vHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
+    if (drawY < -120 || drawY > vHeight + 120 || drawX < -120 || drawX > vWidth + 120) {
       return;
     }
 
     const progress = 1 - this.life / this.maxLife; // 0 to 1
     let alpha = 1 - progress;
 
-    // Natural flicker effect for crackles and stars
     if (this.flicker) {
       alpha *= 0.65 + Math.random() * 0.55;
     }
 
-    // Color transition: from primary to secondary color as it cools
+    // Color transition from primary to secondary as particle cools
     let currentColor = this.color;
     if (this.secondaryColor && progress > 0.45) {
       currentColor = this.secondaryColor;
     }
 
-    // Draw high-speed light streak / trail in world space offset by scroll
+    // Fast light streak / trail line in world space offset by scroll
     const prevIdx = (this.trailIndex - 1 + this.trailLength) % this.trailLength;
     const prevX = this.trailX[prevIdx] - scrollX;
     const prevY = this.trailY[prevIdx] - scrollY;
 
     const currentSize = Math.max(0.6, this.size * (1 - progress * 0.5));
 
-    // Fast light trail line
     ctx.beginPath();
     ctx.moveTo(prevX, prevY);
     ctx.lineTo(drawX, drawY);
@@ -160,10 +155,9 @@ export class Particle {
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // Bright core spark head
+    // Bright core spark
     ctx.beginPath();
     ctx.arc(drawX, drawY, currentSize * 0.75, 0, Math.PI * 2);
-    // Core is slightly brighter/whiter
     ctx.fillStyle = rgbaString(currentColor, alpha);
     ctx.fill();
 
@@ -181,4 +175,3 @@ export class Particle {
     this.trailFilled = 0;
   }
 }
-

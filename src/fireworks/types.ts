@@ -22,6 +22,7 @@ export interface LaunchOptions {
   targetX?: number;
   targetY?: number;
   speed?: number;
+  direction?: 'vertical' | 'horizontal';
   color?: string | FireworkColor;
   secondaryColor?: string | FireworkColor;
   type?: FireworkType;
@@ -40,6 +41,8 @@ export interface BurstOptions {
   velocityScale?: number;
   trailLength?: number;
   isWorldCoord?: boolean;
+  directionalBiasX?: number;
+  directionalBiasY?: number;
 }
 
 export interface SparklerOptions {
@@ -74,4 +77,3 @@ export interface EngineStats {
   fps: number;
   poolAvailable: number;
 }
-

@@ -29,6 +29,10 @@ export class FireworksEngine {
   // Emitters
   private emitters: EmitterManager = new EmitterManager();
 
+  // Directional scroll momentum
+  private globalDriftX: number = 0;
+  private globalDriftY: number = 0;
+
   // Config
   private config: FireworksConfig = {
     intensity: 'medium',
@@ -73,7 +77,7 @@ export class FireworksEngine {
     for (let i = 0; i < poolSize; i++) {
       this.particlePool.push(new Particle());
     }
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 35; i++) {
       this.rocketPool.push(new Rocket());
     }
   }
@@ -84,7 +88,6 @@ export class FireworksEngine {
     this.ctx = canvas.getContext('2d', { alpha: true });
     this.resize();
 
-    // Visibility change handler
     if (typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
@@ -152,14 +155,12 @@ export class FireworksEngine {
   }
 
   public clear(): void {
-    // Return active particles to pool
     for (let i = 0; i < this.activeParticles.length; i++) {
       this.activeParticles[i].reset();
       this.particlePool.push(this.activeParticles[i]);
     }
     this.activeParticles = [];
 
-    // Return active rockets to pool
     for (let i = 0; i < this.activeRockets.length; i++) {
       this.activeRockets[i].reset();
       this.rocketPool.push(this.activeRockets[i]);
@@ -174,10 +175,17 @@ export class FireworksEngine {
     }
   }
 
+  // --- DIRECTIONAL SCROLL VELOCITY IMPULSE ---
+  public applyScrollVelocity(vx: number, vy: number): void {
+    // Dampen and apply momentum to active particles
+    this.globalDriftX = Math.max(-1.8, Math.min(1.8, vx * 0.05));
+    this.globalDriftY = Math.max(-1.8, Math.min(1.8, vy * 0.05));
+  }
+
   // --- PARTICLE SPAWNING HELPER ---
   public spawnParticle = (opts: ParticleInitOptions): void => {
     if (this.activeParticles.length >= this.config.maxParticles) {
-      return; // Cap budget
+      return;
     }
 
     const p = this.particlePool.pop();
@@ -189,20 +197,34 @@ export class FireworksEngine {
 
   // --- PUBLIC API METHODS ---
 
-  // 1. Launch a Rocket
+  // 1. Launch a Rocket (Vertical or Horizontal)
   public launch(options: LaunchOptions = {}): void {
     if (this.config.reducedMotion) return;
     if (!this.canvas) return;
 
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
 
-    const startX = options.startX ?? (width * 0.2 + Math.random() * width * 0.6);
-    const startY = options.startY ?? (height + 15);
-    const targetX = options.targetX ?? (startX + (Math.random() - 0.5) * (width * 0.25));
-    
-    // Altitude: default 20% to 45% from top of screen
-    const targetY = options.targetY ?? (height * (options.altitudeRatio ?? (0.2 + Math.random() * 0.25)));
+    const direction = options.direction || 'vertical';
+
+    let startX: number;
+    let startY: number;
+    let targetX: number;
+    let targetY: number;
+
+    if (direction === 'horizontal') {
+      startX = options.startX ?? (scrollX + (Math.random() < 0.5 ? 50 : width - 50));
+      startY = options.startY ?? (scrollY + height * (0.25 + Math.random() * 0.35));
+      targetX = options.targetX ?? (startX + (startX < scrollX + width / 2 ? width * 0.6 : -width * 0.6));
+      targetY = options.targetY ?? (startY + (Math.random() - 0.5) * 60);
+    } else {
+      startX = options.startX ?? (scrollX + width * 0.2 + Math.random() * width * 0.6);
+      startY = options.startY ?? (scrollY + height + 20);
+      targetX = options.targetX ?? (startX + (Math.random() - 0.5) * (width * 0.2));
+      targetY = options.targetY ?? (scrollY + height * (options.altitudeRatio ?? (0.2 + Math.random() * 0.25)));
+    }
 
     const [pairPrimary, pairSecondary] = getRandomAerialPair();
     const color = options.color ? parseColor(options.color) : pairPrimary;
@@ -212,24 +234,25 @@ export class FireworksEngine {
     const rocket = this.rocketPool.pop();
     if (!rocket) return;
 
-    fireworksAudio.playRocketLaunch(startX);
+    fireworksAudio.playRocketLaunch(startX - scrollX);
 
     rocket.init({
       x: startX,
       y: startY,
       targetX,
       targetY,
+      direction,
       color,
       secondaryColor,
       burstType: type,
-      particleCount: Math.floor((options.particleCount ?? 95) * this.config.particleBudgetScale),
+      particleCount: Math.floor((options.particleCount ?? 85) * this.config.particleBudgetScale),
       speed: options.speed,
-      onTrailSpark: (tx, ty, sparkColor) => {
+      onTrailSpark: (tx, ty, sparkColor, spVx = 0, spVy = 0) => {
         this.spawnParticle({
           x: tx,
           y: ty,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: 0.8 + Math.random() * 0.8,
+          vx: spVx || (Math.random() - 0.5) * 0.6,
+          vy: spVy || (0.8 + Math.random() * 0.8),
           color: sparkColor,
           secondaryColor: PALETTE.copperEmber,
           size: 1.4,
@@ -240,11 +263,14 @@ export class FireworksEngine {
         });
       },
       onDetonate: (r) => {
+        const biasX = direction === 'horizontal' ? r.vx * 0.25 : 0;
         this.burst(r.x, r.y, {
           color: r.color,
           secondaryColor: r.secondaryColor || undefined,
           type: r.burstType,
           particleCount: r.particleCount,
+          isWorldCoord: true,
+          directionalBiasX: biasX,
         });
       },
     });
@@ -265,7 +291,6 @@ export class FireworksEngine {
     const budgetCount = Math.floor((options.particleCount ?? 85) * this.config.particleBudgetScale);
     const burstOpts: BurstOptions = { ...options, particleCount: budgetCount };
 
-    // Play burst sound
     const size = (budgetCount > 100) ? 'large' : (budgetCount > 60 ? 'medium' : 'small');
     fireworksAudio.playBurst(worldX - scrollX, size);
 
@@ -278,7 +303,6 @@ export class FireworksEngine {
       this.emitters.createCrackler(this.spawnParticle, worldX, worldY, burstOpts);
       fireworksAudio.playCrackles(worldX - scrollX);
     } else {
-      // Default chrysanthemum
       this.emitters.createChrysanthemum(this.spawnParticle, worldX, worldY, burstOpts);
       if (Math.random() < 0.5) {
         setTimeout(() => fireworksAudio.playCrackles(worldX - scrollX), 800);
@@ -286,7 +310,23 @@ export class FireworksEngine {
     }
   }
 
-  // 3. Ignite a Sparkler (Phuljhari)
+  // 3. Section / Element Anchor Burst
+  public burstAtElement(element: HTMLElement, relX: number = 0.5, relY: number = 0.5, options: BurstOptions = {}): void {
+    const rect = element.getBoundingClientRect();
+    const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+    const worldX = rect.left + scrollX + rect.width * relX;
+    const worldY = rect.top + scrollY + rect.height * relY;
+    this.burst(worldX, worldY, { ...options, isWorldCoord: true });
+  }
+
+  public burstInSection(sectionId: string, relX: number = 0.5, relY: number = 0.3, options: BurstOptions = {}): void {
+    const el = document.getElementById(sectionId);
+    if (!el) return;
+    this.burstAtElement(el, relX, relY, options);
+  }
+
+  // 4. Ignite a Sparkler (Phuljhari)
   public sparkler(x: number, y: number, options: SparklerOptions = {}): void {
     if (this.config.reducedMotion) return;
     const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
@@ -298,7 +338,7 @@ export class FireworksEngine {
     this.emitters.startSparkler(worldX, worldY, options);
   }
 
-  // 4. Ignite a Fountain (Anar)
+  // 5. Ignite a Fountain (Anar)
   public fountain(x: number, y: number, options: FountainOptions = {}): void {
     if (this.config.reducedMotion) return;
     const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
@@ -310,7 +350,7 @@ export class FireworksEngine {
     this.emitters.startAnar(worldX, worldY, options);
   }
 
-  // 5. Ambient Scheduler
+  // 6. Ambient Scheduler
   public ambient(enabled: boolean): void {
     this.config.ambientEnabled = enabled;
     if (enabled && !this.ambientTimer && !this.config.reducedMotion) {
@@ -324,8 +364,7 @@ export class FireworksEngine {
   private scheduleAmbient = (): void => {
     if (!this.config.ambientEnabled || this.config.reducedMotion) return;
 
-    // Interval between ambient bursts: 6 to 11 seconds for tasteful subtlety
-    const delay = Math.random() * 5000 + 6000;
+    const delay = Math.random() * 6000 + 7000;
     this.ambientTimer = window.setTimeout(() => {
       if (this.config.ambientEnabled && this.isVisible) {
         this.triggerAmbientBurst();
@@ -339,22 +378,21 @@ export class FireworksEngine {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    // Tasteful, distant burst: smaller size, upper twilight sky
     const x = width * 0.15 + Math.random() * width * 0.7;
-    const y = height * (0.15 + Math.random() * 0.25);
+    const y = height * (0.15 + Math.random() * 0.22);
 
     const [col1, col2] = getRandomAerialPair();
-    const type: FireworkType = Math.random() < 0.4 ? 'chrysanthemum' : (Math.random() < 0.5 ? 'peony' : 'willow');
+    const type: FireworkType = Math.random() < 0.45 ? 'chrysanthemum' : (Math.random() < 0.5 ? 'peony' : 'willow');
     this.burst(x, y, {
       color: col1,
       secondaryColor: col2,
       type,
       particleCount: Math.floor(65 * this.config.particleBudgetScale),
-      velocityScale: 3.6,
+      velocityScale: 3.5,
     });
   }
 
-  // 6. Set Intensity
+  // 7. Set Intensity
   public setIntensity(intensity: FireworkIntensity): void {
     this.config.intensity = intensity;
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -384,7 +422,6 @@ export class FireworksEngine {
   private renderLoop = (): void => {
     if (!this.isRunning) return;
 
-    // Calculate FPS
     const now = performance.now();
     this.frameCount++;
     if (now - this.lastTime >= 1000) {
@@ -398,13 +435,9 @@ export class FireworksEngine {
       const width = this.canvas.width / dpr;
       const height = this.canvas.height / dpr;
 
-      // Clear full canvas
       this.ctx.clearRect(0, 0, width, height);
-
-      // Additive blending for fireworks sparks
       this.ctx.globalCompositeOperation = 'lighter';
 
-      // Read current scroll coordinates once per frame
       const scrollX = typeof window !== 'undefined' ? window.scrollX : 0;
       const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
 
@@ -412,7 +445,7 @@ export class FireworksEngine {
       for (let i = this.activeRockets.length - 1; i >= 0; i--) {
         const r = this.activeRockets[i];
         if (r.update()) {
-          r.draw(this.ctx);
+          r.draw(this.ctx, scrollX, scrollY);
         } else {
           this.activeRockets.splice(i, 1);
           r.reset();
@@ -423,13 +456,13 @@ export class FireworksEngine {
       // 2. Update Continuous Emitters
       this.emitters.update(this.spawnParticle);
 
-      // 3. Update & Draw Particles
+      // 3. Update & Draw Particles with directional scroll momentum
       for (let i = this.activeParticles.length - 1; i >= 0; i--) {
         const p = this.activeParticles[i];
-        if (p.update()) {
+        if (p.update(this.globalDriftX, this.globalDriftY)) {
           p.draw(this.ctx, scrollX, scrollY);
         } else {
-          // If particle died and has secondary crackles
+          // Secondary crackles
           if (p.hasCrackles && Math.random() < 0.35 && this.activeParticles.length < this.config.maxParticles - 20) {
             for (let c = 0; c < 3; c++) {
               const a = Math.random() * Math.PI * 2;
@@ -437,8 +470,8 @@ export class FireworksEngine {
               this.spawnParticle({
                 x: p.x,
                 y: p.y,
-                vx: Math.cos(a) * spd,
-                vy: Math.sin(a) * spd,
+                vx: Math.cos(a) * spd + this.globalDriftX,
+                vy: Math.sin(a) * spd + this.globalDriftY,
                 color: PALETTE.coolWhite,
                 secondaryColor: PALETTE.diyaAmber,
                 size: 1.2,
@@ -457,8 +490,12 @@ export class FireworksEngine {
         }
       }
 
-      // Restore standard composite mode
+      // Restore composite mode
       this.ctx.globalCompositeOperation = 'source-over';
+
+      // Decay scroll momentum drift
+      this.globalDriftX *= 0.90;
+      this.globalDriftY *= 0.90;
     }
 
     this.animationFrameId = requestAnimationFrame(this.renderLoop);
@@ -466,4 +503,3 @@ export class FireworksEngine {
 }
 
 export const fireworks = new FireworksEngine();
-

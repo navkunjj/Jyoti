@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { InteractiveDiya } from './InteractiveDiya';
 import { WishGreetingCard } from './WishGreetingCard';
 import { LotusIcon } from '../UI/LotusIcon';
-import { Sparkles, Moon, Sun } from 'lucide-react';
 
 interface FloatingLantern {
   id: number;

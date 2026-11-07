@@ -1,6 +1,6 @@
 import React from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
-import { ArrowUp, Sparkles, Heart } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -108,8 +108,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <span>Crafted with reverence for Indian heritage, art & light.</span>
           </p>
           <div className="flex items-center space-x-2 text-[#FFE29A] font-serif text-sm italic">
-            <Sparkles className="w-3.5 h-3.5 text-[#FDB863]" />
-            <span>शुभ दीपावली • May light triumph over all darkness</span>
+            <span>शुभ दीपावली · May light triumph over all darkness</span>
           </div>
         </div>
       </div>

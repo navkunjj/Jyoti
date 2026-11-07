@@ -4,7 +4,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CelebrationEmotion } from '../../types';
 import { EmotionCard } from './EmotionCard';
 import { RangoliPattern } from '../UI/RangoliPattern';
-import { Heart, Sparkles } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -104,12 +103,9 @@ export const CelebrationSection: React.FC = () => {
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Editorial Section Header */}
         <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-20 sm:mb-28">
-          <div className="flex items-center justify-center space-x-3 mb-3">
-            <Heart className="w-4 h-4 text-[#E98EAF]" />
-            <span className="text-xs uppercase tracking-[0.35em] text-[#E98EAF] font-medium">
-              Chapter 04 — Human Emotions
-            </span>
-          </div>
+          <span className="text-xs uppercase tracking-[0.35em] text-[#E98EAF] font-medium block mb-3">
+            Chapter 04 · Human Emotions
+          </span>
 
           <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#F3EAE2] tracking-wide mb-4">
             The Celebration

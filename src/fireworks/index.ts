@@ -8,5 +8,6 @@ export * from './engine';
 export * from './sequences';
 export * from './scrollCrackers';
 export * from './FireworksCanvas';
-export * from './FireworksDebugPanel';
-
+export * from './FireworksController';
+export * from './useScrollFireworks';
+export * from './fireworks.config';

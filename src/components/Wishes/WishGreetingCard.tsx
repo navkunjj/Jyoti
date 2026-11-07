@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
-import { Sparkles, Copy, Check, Send, Flame } from 'lucide-react';
+import { Copy, Check, Send } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
 import { fireworks } from '../../fireworks';
-import confetti from 'canvas-confetti';
 
 interface WishGreetingCardProps {
   onReleaseLantern: (text: string) => void;
@@ -54,17 +53,10 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
     e.preventDefault();
     soundscape.playLanternSound();
 
-    confetti({
-      particleCount: 60,
-      spread: 70,
-      origin: { y: 0.7, x: 0.5 },
-      colors: ['#FFE29A', '#FDB863', '#E98EAF', '#F4C4D2', '#FFF'],
-    });
-
     const lanternText = `${recipient ? `For ${recipient}: ` : ''}${blessingPresets[blessingType].shloka}`;
     onReleaseLantern(lanternText);
 
-    // Launch celebratory rocket accompanying the sky lantern
+    // Launch celebratory aerial firework in world coordinates
     const rx = typeof window !== 'undefined' ? (window.innerWidth * 0.5 + (Math.random() - 0.5) * 120) : 400;
     fireworks.launch({
       startX: rx,
@@ -175,16 +167,16 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             type="submit"
-            className="flex-1 py-3 px-6 rounded-full bg-gradient-to-r from-[#E98EAF] via-[#F4C4D2] to-[#FDB863] text-[#061116] font-medium text-xs uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(233,142,175,0.4)] hover:shadow-[0_0_30px_rgba(253,184,99,0.6)] transition-all flex items-center justify-center space-x-2 focus:outline-none"
+            className="flex-1 py-3 px-6 rounded-full border border-[#E98EAF] bg-[#E98EAF]/15 hover:bg-[#E98EAF]/25 text-[#F3EAE2] font-medium text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-2 focus:outline-none"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-3.5 h-3.5 text-[#E98EAF]" />
             <span>Release Sky Lantern & Send</span>
           </button>
 
           <button
             type="button"
             onClick={handleCopyWish}
-            className="py-3 px-5 rounded-full border border-[#A99BBF]/30 hover:border-[#E98EAF] text-[#F3EAE2] text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 focus:outline-none"
+            className="py-3 px-5 rounded-full border border-[#A99BBF]/20 hover:border-[#E98EAF]/50 text-[#F3EAE2] text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 focus:outline-none"
           >
             {copied ? (
               <>
@@ -193,7 +185,7 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 text-[#FDB863]" />
+                <Copy className="w-3.5 h-3.5 text-[#FFE29A]" />
                 <span>Copy Wish</span>
               </>
             )}
@@ -202,14 +194,11 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
       </form>
 
       {/* 2. Right Live Card Preview (5 cols) */}
-      <div className="lg:col-span-5 relative group">
-        <div className="p-7 sm:p-8 rounded-3xl bg-gradient-to-b from-[#102C38] via-[#0A1B22] to-[#101B35] border border-[#E98EAF]/50 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[380px]">
-          {/* Card Ambient Glow Corner */}
-          <div className="absolute top-0 right-0 w-36 h-36 bg-[#E98EAF]/15 rounded-full blur-2xl pointer-events-none" />
-
+      <div className="lg:col-span-5 relative">
+        <div className="p-7 sm:p-8 rounded-3xl bg-[#0A1B22]/90 border border-[#A99BBF]/25 shadow-xl relative flex flex-col justify-between min-h-[380px]">
           {/* Top of Card */}
           <div>
-            <div className="flex items-center justify-between border-b border-[#A99BBF]/20 pb-4 mb-5">
+            <div className="flex items-center justify-between border-b border-[#A99BBF]/15 pb-4 mb-5">
               <div className="flex items-center space-x-2.5">
                 <LotusIcon size={24} glow />
                 <span className="font-serif tracking-[0.22em] text-lg text-[#F3EAE2]">
@@ -238,7 +227,7 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
           </div>
 
           {/* Bottom Sanskrit Shloka & Sender */}
-          <div className="border-t border-[#A99BBF]/20 pt-4 space-y-3">
+          <div className="border-t border-[#A99BBF]/15 pt-4 space-y-3">
             <div className="text-center p-2.5 rounded-xl bg-[#061116]/60 border border-[#A99BBF]/15">
               <div className="font-serif text-sm text-[#FFE29A] tracking-wider">
                 {blessingPresets[blessingType].shloka}
@@ -252,16 +241,12 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
               <span className="text-[11px] text-[#A99BBF]">
                 From: <strong className="text-[#F3EAE2] font-medium">{sender || 'A Well-Wisher'}</strong>
               </span>
-              <span className="text-[10px] text-[#E98EAF] uppercase tracking-widest flex items-center space-x-1">
-                <Flame className="w-3 h-3 text-[#FDB863]" />
-                <span>Happy Diwali</span>
+              <span className="text-[10px] text-[#E98EAF] uppercase tracking-widest">
+                Happy Diwali
               </span>
             </div>
           </div>
         </div>
-
-        {/* Ambient Underglow */}
-        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#E98EAF]/20 via-[#FDB863]/20 to-transparent -z-10 blur-xl" />
       </div>
     </div>
   );

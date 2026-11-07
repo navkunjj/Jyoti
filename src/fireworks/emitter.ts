@@ -44,15 +44,16 @@ export class EmitterManager {
     const secondary = opts.secondaryColor ? parseColor(opts.secondaryColor) : PALETTE.diyaAmber;
     const count = opts.particleCount ?? 80;
     const baseSpeed = opts.velocityScale ?? 4.2;
+    const biasX = opts.directionalBiasX ?? 0;
+    const biasY = opts.directionalBiasY ?? 0;
 
     for (let i = 0; i < count; i++) {
-      // 3D-projected sphere distribution
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
       const speed = baseSpeed * (0.4 + Math.random() * 0.7);
 
-      const vx = Math.sin(phi) * Math.cos(theta) * speed;
-      const vy = (Math.sin(phi) * Math.sin(theta) * speed) * 0.95; // slight perspective compression
+      const vx = Math.sin(phi) * Math.cos(theta) * speed + biasX;
+      const vy = (Math.sin(phi) * Math.sin(theta) * speed) * 0.95 + biasY;
 
       spawnParticle({
         x,
@@ -81,15 +82,16 @@ export class EmitterManager {
     const secondary = opts.secondaryColor ? parseColor(opts.secondaryColor) : PALETTE.lotusPink;
     const count = opts.particleCount ?? 110;
     const baseSpeed = opts.velocityScale ?? 5.5;
+    const biasX = opts.directionalBiasX ?? 0;
+    const biasY = opts.directionalBiasY ?? 0;
 
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
-      // Multi-ring layers for deep chrysanthemum look
       const layer = (i % 3 === 0) ? 0.6 : (i % 3 === 1 ? 0.85 : 1.05);
       const speed = baseSpeed * layer * (0.85 + Math.random() * 0.3);
 
-      const vx = Math.cos(angle) * speed;
-      const vy = Math.sin(angle) * speed;
+      const vx = Math.cos(angle) * speed + biasX;
+      const vy = Math.sin(angle) * speed + biasY;
 
       spawnParticle({
         x,
@@ -100,9 +102,9 @@ export class EmitterManager {
         secondaryColor: secondary,
         size: 2.2 + Math.random() * 1.5,
         life: Math.floor(55 + Math.random() * 40),
-        drag: 0.968, // slightly lower drag for long streaking trails
+        drag: 0.968,
         gravity: 0.065,
-        trailLength: 6, // longer streak
+        trailLength: 6,
         hasCrackles: Math.random() < 0.3,
         flicker: Math.random() < 0.35,
       });
@@ -119,6 +121,8 @@ export class EmitterManager {
     const secondary = opts.secondaryColor ? parseColor(opts.secondaryColor) : PALETTE.starlightIvory;
     const count = opts.particleCount ?? 90;
     const baseSpeed = opts.velocityScale ?? 3.8;
+    const biasX = opts.directionalBiasX ?? 0;
+    const biasY = opts.directionalBiasY ?? 0;
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -127,14 +131,14 @@ export class EmitterManager {
       spawnParticle({
         x,
         y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed * 0.85,
+        vx: Math.cos(angle) * speed + biasX,
+        vy: Math.sin(angle) * speed * 0.85 + biasY,
         color,
         secondaryColor: secondary,
         size: 1.6 + Math.random() * 1.4,
-        life: Math.floor(75 + Math.random() * 45), // long lasting weeping embers
+        life: Math.floor(75 + Math.random() * 45),
         drag: 0.978,
-        gravity: 0.08, // heavier droop
+        gravity: 0.08,
         trailLength: 6,
         isWillow: true,
         flicker: Math.random() < 0.4,
@@ -151,6 +155,8 @@ export class EmitterManager {
     const color = parseColor(opts.color || PALETTE.coolWhite);
     const secondary = opts.secondaryColor ? parseColor(opts.secondaryColor) : PALETTE.electricPink;
     const count = opts.particleCount ?? 65;
+    const biasX = opts.directionalBiasX ?? 0;
+    const biasY = opts.directionalBiasY ?? 0;
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -159,8 +165,8 @@ export class EmitterManager {
       spawnParticle({
         x: x + (Math.random() - 0.5) * 10,
         y: y + (Math.random() - 0.5) * 10,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        vx: Math.cos(angle) * speed + biasX,
+        vy: Math.sin(angle) * speed + biasY,
         color,
         secondaryColor: secondary,
         size: 1.4 + Math.random() * 1.8,
@@ -182,7 +188,7 @@ export class EmitterManager {
     opts: SparklerOptions = {}
   ): ContinuousEmitter {
     const color = parseColor(opts.color || PALETTE.diyaAmber);
-    const duration = Math.floor((opts.durationMs ?? 3000) / 16.6); // in frames (~60fps)
+    const duration = Math.floor((opts.durationMs ?? 3000) / 16.6);
     const sparksPerFrame = Math.max(4, Math.floor(8 * (opts.intensity ?? 1)));
 
     const emitter: ContinuousEmitter = {
@@ -201,29 +207,27 @@ export class EmitterManager {
           return false;
         }
 
-        // Emit dense high-velocity needle sparks
         for (let i = 0; i < sparksPerFrame; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const speed = 2.5 + Math.random() * 5.5;
-          const sparkColor = (Math.random() < 0.35)
-            ? PALETTE.coolWhite
-            : (Math.random() < 0.6 ? PALETTE.diyaAmber : PALETTE.warmGold);
+          const speed = 1.2 + Math.random() * 4.5;
+          const sparkCol = SPARK_PALETTE[Math.floor(Math.random() * SPARK_PALETTE.length)];
 
           spawnParticle({
             x: emitter.x + (Math.random() - 0.5) * 4,
             y: emitter.y + (Math.random() - 0.5) * 4,
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
-            color: sparkColor,
+            color: sparkCol,
             secondaryColor: PALETTE.copperEmber,
-            size: 1.2 + Math.random() * 1.4,
-            life: Math.floor(12 + Math.random() * 18),
-            drag: 0.91, // high drag slows needle sparks quickly
-            gravity: 0.04,
-            trailLength: 3,
+            size: 1.2 + Math.random() * 1.2,
+            life: Math.floor(14 + Math.random() * 18),
+            drag: 0.92,
+            gravity: 0.06,
+            trailLength: 2,
             flicker: true,
           });
         }
+
         return true;
       },
     };
@@ -237,10 +241,11 @@ export class EmitterManager {
     y: number,
     opts: FountainOptions = {}
   ): ContinuousEmitter {
-    const color = parseColor(opts.color || PALETTE.warmGold);
-    const secondary = parseColor(opts.secondaryColor || PALETTE.electricPink);
-    const duration = Math.floor((opts.durationMs ?? 4200) / 16.6);
-    const baseHeight = opts.height ?? 14;
+    const duration = Math.floor((opts.durationMs ?? 3500) / 16.6);
+    const primaryColor = parseColor(opts.color || PALETTE.warmGold);
+    const secondaryColor = opts.secondaryColor ? parseColor(opts.secondaryColor) : PALETTE.copperEmber;
+    const baseHeight = opts.height ?? 16;
+    const spread = opts.spread ?? 0.35;
 
     const emitter: ContinuousEmitter = {
       id: `anar-${Date.now()}-${Math.random()}`,
@@ -249,8 +254,8 @@ export class EmitterManager {
       y,
       durationFrames: duration,
       elapsedFrames: 0,
-      color,
-      secondaryColor: secondary,
+      color: primaryColor,
+      secondaryColor,
       active: true,
       update: (spawnParticle) => {
         emitter.elapsedFrames++;
@@ -259,35 +264,31 @@ export class EmitterManager {
           return false;
         }
 
-        // Anar ramps up, peaks in middle, then fades gently
+        // Conical plume eruption
         const progress = emitter.elapsedFrames / emitter.durationFrames;
-        const curve = Math.sin(progress * Math.PI); // 0 -> 1 -> 0
-        const sparks = Math.floor((6 + curve * 14));
+        const intensityFactor = Math.sin(progress * Math.PI); // crescendos in middle
+        const count = Math.max(3, Math.floor(10 * intensityFactor));
 
-        for (let i = 0; i < sparks; i++) {
-          // Narrow conical upward geyser
-          const spreadAngle = -Math.PI / 2 + (Math.random() - 0.5) * 0.48; // roughly vertical
-          const speed = (baseHeight * (0.65 + curve * 0.55)) * (0.75 + Math.random() * 0.45);
-
-          const sparkColor = Math.random() < 0.25
-            ? PALETTE.coolWhite
-            : (Math.random() < 0.65 ? emitter.color : (emitter.secondaryColor || PALETTE.copperEmber));
+        for (let i = 0; i < count; i++) {
+          const upwardSpeed = -(baseHeight * (0.5 + Math.random() * 0.7));
+          const horizontalSpread = (Math.random() - 0.5) * (baseHeight * spread);
 
           spawnParticle({
-            x: emitter.x + (Math.random() - 0.5) * 8,
+            x: emitter.x + (Math.random() - 0.5) * 6,
             y: emitter.y,
-            vx: Math.cos(spreadAngle) * speed,
-            vy: Math.sin(spreadAngle) * speed,
-            color: sparkColor,
-            secondaryColor: PALETTE.copperEmber,
-            size: 1.5 + Math.random() * 1.5,
-            life: Math.floor(40 + Math.random() * 35),
+            vx: horizontalSpread,
+            vy: upwardSpeed,
+            color: Math.random() < 0.6 ? primaryColor : (emitter.secondaryColor || primaryColor),
+            secondaryColor: PALETTE.coolWhite,
+            size: 1.6 + Math.random() * 1.5,
+            life: Math.floor(35 + Math.random() * 25),
             drag: 0.972,
-            gravity: 0.16, // heavy gravity causes geyser to arch and cascade down
-            trailLength: 4,
-            flicker: Math.random() < 0.35,
+            gravity: 0.32, // high gravity causes beautiful parabolic falling fountain cascade
+            trailLength: 3,
+            flicker: Math.random() < 0.4,
           });
         }
+
         return true;
       },
     };
@@ -296,4 +297,3 @@ export class EmitterManager {
     return emitter;
   }
 }
-
