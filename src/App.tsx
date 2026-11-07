@@ -112,10 +112,10 @@ export function App() {
 
         {/* Chapter 05 — Send Wishes & Interactive Diya */}
         <WishesSection />
-      </main>
 
-      {/* 4. Graceful Footer */}
-      <Footer onNavigate={handleNavigate} />
+        {/* 4. Graceful Footer (Overlapping Scroll-Reveal Finale) */}
+        <Footer onNavigate={handleNavigate} />
+      </main>
     </div>
   );
 }

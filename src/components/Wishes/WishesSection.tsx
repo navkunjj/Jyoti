@@ -1,7 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { InteractiveDiya } from './InteractiveDiya';
 import { WishGreetingCard } from './WishGreetingCard';
 import { LotusIcon } from '../UI/LotusIcon';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface FloatingLantern {
   id: number;
@@ -10,18 +14,49 @@ interface FloatingLantern {
 }
 
 export const WishesSection: React.FC = () => {
+  const containerRef = useRef<HTMLElement | null>(null);
   const [lanterns, setLanterns] = useState<FloatingLantern[]>([]);
+
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Pinned Wishes Section with Overlapping Footer Scroll-Reveal:
+    // When the user reaches the bottom of Chapter 05, the wishes section remains
+    // visually stationary while the site footer slides upward and covers it.
+    if (!prefersReducedMotion && containerRef.current) {
+      const getFooterHeight = () => {
+        const footer = document.getElementById('site-footer');
+        return footer ? footer.offsetHeight : window.innerHeight;
+      };
+
+      const trigger = ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: 'bottom bottom',
+        end: () => `+=${getFooterHeight()}`,
+        pin: true,
+        pinSpacing: false, // Footer naturally scrolls up and overlaps the stationary wishes section
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      });
+
+      return () => {
+        trigger.kill();
+      };
+    }
+  }, []);
 
   const handleReleaseLantern = (wishText: string) => {
     const newLantern: FloatingLantern = {
       id: Date.now() + Math.random(),
-      x: Math.random() * 70 + 15, // between 15% and 85% width
+      x: Math.random() * 70 + 15,
       text: wishText,
     };
 
     setLanterns((prev) => [...prev, newLantern]);
 
-    // Automatically remove after animation completes
     setTimeout(() => {
       setLanterns((prev) => prev.filter((l) => l.id !== newLantern.id));
     }, 9000);
@@ -30,7 +65,8 @@ export const WishesSection: React.FC = () => {
   return (
     <section
       id="wishes"
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
+      ref={containerRef}
+      className="relative z-10 w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
       aria-label="Chapter 05 Send Wishes and Blessings"
     >
       {/* Sky Lanterns Animation Layer */}
@@ -46,15 +82,12 @@ export const WishesSection: React.FC = () => {
           >
             {/* Akash Kandil / Sky Lantern Visual */}
             <div className="relative flex flex-col items-center">
-              {/* Outer soft glow */}
               <div className="w-16 h-20 rounded-2xl bg-gradient-to-t from-[#FF8833] via-[#FDB863] to-[#FFE29A] opacity-90 shadow-[0_0_35px_rgba(253,184,99,0.9)] flex items-center justify-center p-2">
                 <span className="w-3 h-4 bg-white rounded-full animate-ping opacity-75" />
               </div>
-              {/* Lantern tassel */}
               <div className="w-0.5 h-6 bg-[#E98EAF]/60" />
               <div className="w-1.5 h-1.5 rounded-full bg-[#E98EAF]" />
             </div>
-            {/* Wish text floating along */}
             <span className="text-[10px] text-[#FFE29A] bg-[#061116]/80 px-2 py-0.5 rounded-full mt-2 font-mono whitespace-nowrap opacity-80">
               {l.text}
             </span>
@@ -119,4 +152,3 @@ export const WishesSection: React.FC = () => {
     </section>
   );
 };
-

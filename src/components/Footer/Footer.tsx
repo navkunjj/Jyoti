@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
 import { ArrowUp } from 'lucide-react';
 
@@ -7,8 +7,10 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const footerRef = useRef<HTMLElement | null>(null);
+
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    onNavigate('welcome');
   };
 
   const festivalDays = [
@@ -20,14 +22,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <footer className="relative bg-[#040C10] border-t border-[#A99BBF]/20 text-[#F3EAE2] pt-20 pb-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden">
+    <footer
+      id="site-footer"
+      ref={footerRef}
+      className="relative z-20 w-full min-h-[100svh] min-h-[680px] bg-[#040C10] border-t border-[#A99BBF]/20 text-[#F3EAE2] pt-16 sm:pt-20 pb-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden shadow-[0_-30px_70px_rgba(0,0,0,0.95)] flex flex-col justify-between"
+    >
       {/* Background Subtle Radial Gradient */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gradient-to-t from-[#102C38]/40 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-t from-[#102C38]/40 to-transparent blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto relative z-10 space-y-16">
+      <div className="max-w-7xl mx-auto w-full relative z-10 flex flex-col justify-between flex-grow space-y-12">
         {/* Five Days of Diwali Calendar */}
-        <div className="border-b border-[#A99BBF]/15 pb-16">
-          <div className="text-center mb-10">
+        <div className="border-b border-[#A99BBF]/15 pb-12">
+          <div className="text-center mb-8">
             <span className="text-xs uppercase tracking-[0.3em] text-[#E98EAF] font-medium block mb-2">
               The Sacred Continuum
             </span>
@@ -59,7 +65,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
 
         {/* Brand & Navigation Links */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-2">
           <div className="flex items-center space-x-4">
             <LotusIcon size={38} glow />
             <div>
@@ -103,7 +109,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
 
         {/* Copyright & Cultural Dedication */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-[#A99BBF]/70 pt-8 border-t border-[#A99BBF]/15 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-[#A99BBF]/70 pt-6 border-t border-[#A99BBF]/15 gap-4">
           <p className="flex items-center space-x-1.5">
             <span>Crafted with reverence for Indian heritage, art & light.</span>
           </p>
@@ -115,4 +121,3 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
     </footer>
   );
 };
-
