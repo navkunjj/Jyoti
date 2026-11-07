@@ -28,7 +28,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const ctx = gsap.context(() => {
-      // 1. Cinematic subtle entrance on page load
+      // 1. Initial entrance animation on page load
       const entranceTl = gsap.timeline({ delay: 0.2 });
 
       if (bgImageRef.current) {
@@ -82,63 +82,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         '-=0.5'
       );
 
-      // 2. Cinematic Pinned Hero with Layered Scroll-Reveal Parallax
-      // The hero stays visually stationary while Chapter 02 slides upward over it
+      // 2. Completely Stationary Pinned Hero:
+      // The hero section remains visually pinned and 100% stationary.
+      // Hero text (JYOTI heading, subtitle, description, CTA button) does NOT move, shift, fade, or blur.
+      // Only the next content section moves upward and covers the hero.
       if (!prefersReducedMotion && containerRef.current) {
         const getHeroHeight = () => containerRef.current?.offsetHeight || window.innerHeight;
 
-        const pinTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top top',
-            end: () => `+=${getHeroHeight()}`,
-            pin: true,
-            pinSpacing: false, // Allows subsequent content to naturally rise over the pinned hero
-            scrub: 1, // Smooth sync with Lenis smooth scroll
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: 'top top',
+          end: () => `+=${getHeroHeight()}`,
+          pin: true,
+          pinSpacing: false, // Next section naturally scrolls up and overlaps the stationary hero
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         });
-
-        // Cinematic background subtle zoom & gentle downward parallax
-        if (bgImageRef.current) {
-          pinTimeline.to(
-            bgImageRef.current,
-            {
-              scale: 1.08,
-              yPercent: 6,
-              filter: 'brightness(0.72)',
-              ease: 'none',
-            },
-            0
-          );
-        }
-
-        // Foreground content restrained upward parallax drift & gentle fade
-        if (contentRef.current) {
-          pinTimeline.to(
-            contentRef.current,
-            {
-              yPercent: -18,
-              opacity: 0.35,
-              ease: 'none',
-            },
-            0
-          );
-        }
-
-        // Terrace Diya subtle parallax
-        if (diyaWrapperRef.current) {
-          pinTimeline.to(
-            diyaWrapperRef.current,
-            {
-              yPercent: -12,
-              opacity: 0.3,
-              ease: 'none',
-            },
-            0
-          );
-        }
       }
     }, containerRef);
 
@@ -170,7 +129,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
           ref={bgImageRef}
           src="/assets/hero-diwali-reference.jpg"
           alt="Atmospheric Diwali celebration by riverside palace ghats under twilight"
-          className="w-full h-full object-cover object-center pointer-events-none will-change-transform"
+          className="w-full h-full object-cover object-center pointer-events-none"
         />
 
         {/* Atmospheric contrast overlays to guarantee high editorial readability */}
@@ -182,10 +141,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 2. Floating Bougainvillea Petals Wind Simulation */}
       <FloatingPetals />
 
-      {/* 3. Center Storytelling Hero Content */}
+      {/* 3. Center Storytelling Hero Content (Completely stationary during scroll) */}
       <div
         ref={contentRef}
-        className="relative z-20 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12 will-change-transform"
+        className="relative z-20 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12"
       >
         {/* Eyebrow: A FESTIVAL OF LIGHTS */}
         <div className="hero-eyebrow flex items-center justify-center space-x-3 mb-5">
@@ -233,7 +192,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 4. Terrace Diya anchored to courtyard foreground */}
       <div
         ref={diyaWrapperRef}
-        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-20 flex flex-col items-center will-change-transform"
+        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-20 flex flex-col items-center"
       >
         <DiyaFlame
           isLit={diyaLit}
