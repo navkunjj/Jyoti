@@ -176,10 +176,10 @@ export class FireworksEngine {
   }
 
   // --- DIRECTIONAL SCROLL VELOCITY IMPULSE ---
-  public applyScrollVelocity(vx: number, vy: number): void {
-    // Dampen and apply momentum to active particles
-    this.globalDriftX = Math.max(-1.8, Math.min(1.8, vx * 0.05));
-    this.globalDriftY = Math.max(-1.8, Math.min(1.8, vy * 0.05));
+  public applyScrollVelocity(_vx: number, _vy: number): void {
+    // Physics momentum removed as requested
+    this.globalDriftX = 0;
+    this.globalDriftY = 0;
   }
 
   // --- PARTICLE SPAWNING HELPER ---
@@ -258,7 +258,7 @@ export class FireworksEngine {
           size: 1.4,
           life: 14 + Math.random() * 12,
           drag: 0.95,
-          gravity: 0.05,
+          gravity: 0,
           trailLength: 2,
         });
       },
@@ -477,7 +477,7 @@ export class FireworksEngine {
                 size: 1.2,
                 life: 12 + Math.random() * 10,
                 drag: 0.92,
-                gravity: 0.05,
+                gravity: 0,
                 trailLength: 2,
                 flicker: true,
               });

@@ -28,8 +28,8 @@ export class Rocket {
 
   public vx: number = 0;
   public vy: number = 0;
-  public gravity: number = 0.16;
-  public drag: number = 0.99;
+  public gravity: number = 0; // Zero gravity
+  public drag: number = 1;
   public direction: 'vertical' | 'horizontal' = 'vertical';
 
   public color: FireworkColor = { r: 255, g: 226, b: 154, hex: '#FFE29A' };
@@ -69,30 +69,25 @@ export class Rocket {
     const dy = this.targetY - this.y;
 
     if (this.direction === 'horizontal') {
-      // Horizontal comet rocket for horizontal scroll storytelling
       const speed = (opts.speed ?? 14) * (dx < 0 ? -1 : 1);
       this.vx = speed;
       this.vy = (dy / Math.max(1, Math.abs(dx))) * Math.abs(speed);
-      this.gravity = 0.03;
-      this.drag = 0.994;
+      this.gravity = 0;
+      this.drag = 1;
       this.maxFrames = Math.max(20, Math.min(80, Math.floor(Math.abs(dx) / Math.abs(speed))));
     } else {
-      // Classic vertical launch
-      this.gravity = 0.16;
-      this.drag = 0.99;
+      this.gravity = 0;
+      this.drag = 1;
       const distanceY = Math.abs(dy);
-      // v^2 = u^2 + 2as -> u = sqrt(2 * a * s)
-      const requiredVy = -Math.sqrt(Math.max(10, 2 * this.gravity * distanceY)) * (opts.speed ?? 1.05);
-      const estimatedFrames = Math.max(15, Math.abs(requiredVy / this.gravity));
-
-      this.vy = requiredVy;
-      this.vx = dx / estimatedFrames;
-      this.maxFrames = Math.floor(estimatedFrames * 1.1);
+      const frames = 35;
+      this.vy = -distanceY / frames;
+      this.vx = dx / frames;
+      this.maxFrames = frames;
     }
 
     this.trailHistory = [];
-    this.wobblePhase = Math.random() * Math.PI * 2;
-    this.wobbleSpeed = 0.18 + Math.random() * 0.1;
+    this.wobblePhase = 0;
+    this.wobbleSpeed = 0;
     this.life = 0;
   }
 
@@ -105,21 +100,9 @@ export class Rocket {
       this.trailHistory.shift();
     }
 
-    // Natural subtle rocket wobble
-    this.wobblePhase += this.wobbleSpeed;
-    const wobble = Math.sin(this.wobblePhase) * 0.5;
-
-    if (this.direction === 'horizontal') {
-      this.vy += this.gravity + wobble * 0.3;
-      this.vx *= this.drag;
-      this.y += this.vy;
-      this.x += this.vx;
-    } else {
-      this.vy += this.gravity;
-      this.vx *= this.drag;
-      this.x += this.vx + wobble;
-      this.y += this.vy;
-    }
+    // Direct linear trajectory (No gravitational pull or wobble physics)
+    this.x += this.vx;
+    this.y += this.vy;
     this.life++;
 
     // Emit glowing trail sparks in the wake

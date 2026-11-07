@@ -33,7 +33,7 @@ export class Particle {
   public life: number = 60;
   public maxLife: number = 60;
   public drag: number = 0.97;
-  public gravity: number = 0.06;
+  public gravity: number = 0; // Gravity removed as requested
 
   public flicker: boolean = false;
   public isWillow: boolean = false;
@@ -61,7 +61,7 @@ export class Particle {
     this.maxLife = this.life;
 
     this.drag = opts.drag ?? 0.968;
-    this.gravity = opts.gravity ?? 0.055;
+    this.gravity = 0; // Zero gravity: fireworks expand symmetrically without falling
 
     this.trailLength = Math.min(6, Math.max(1, opts.trailLength ?? 4));
     this.flicker = opts.flicker ?? (Math.random() < 0.25);
@@ -88,19 +88,9 @@ export class Particle {
       this.trailFilled++;
     }
 
-    // Apply drag & gravity
+    // Apply smooth deceleration (Zero downward gravity / zero momentum drift)
     this.vx *= this.drag;
     this.vy *= this.drag;
-    this.vy += this.gravity;
-
-    // Apply scroll momentum drift (direction-aware responsiveness)
-    if (driftX !== 0) this.vx += driftX;
-    if (driftY !== 0) this.vy += driftY;
-
-    // Willow air turbulence
-    if (this.isWillow) {
-      this.vx += (Math.random() - 0.5) * 0.04;
-    }
 
     this.x += this.vx;
     this.y += this.vy;

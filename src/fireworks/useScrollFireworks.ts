@@ -13,24 +13,7 @@ export function useScrollFireworks() {
   const horizontalLastX = useRef(0);
 
   useEffect(() => {
-    // 1. Scroll Velocity & Momentum Tracking
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      const now = Date.now();
-      const dt = Math.max(1, now - lastScrollTime.current);
-      const dy = currentY - lastScrollY.current;
-      const velocityY = dy / dt; // px per ms
-
-      // Impart vertical velocity to active particles
-      fireworks.applyScrollVelocity(0, velocityY * 0.4);
-
-      lastScrollY.current = currentY;
-      lastScrollTime.current = now;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // 2. Choreographed Storytelling Triggers via GSAP ScrollTrigger
+    // 1. Choreographed Storytelling Triggers via GSAP ScrollTrigger (No physics drift)
     const triggers: ScrollTrigger[] = [];
 
     // A. Hero -> Stories Section Transition
@@ -90,11 +73,7 @@ export function useScrollFireworks() {
             const direction = self.direction; // 1 = scrolling down (content moves right-to-left), -1 = scrolling up (left-to-right)
             const velocity = Math.abs(self.getVelocity());
 
-            // Impart strong horizontal velocity drift to particles based on scroll direction
-            const horizontalDrift = direction > 0 ? -1.6 : 1.6;
-            fireworks.applyScrollVelocity(horizontalDrift * 15, 0);
-
-            // Rate-limit bursts during horizontal scrolling to keep experience refined
+            // Rate-limit bursts during scrolling to keep experience refined
             if (velocity > 120 && now - lastBurstTime.current > 2200) {
               lastBurstTime.current = now;
 
@@ -204,7 +183,6 @@ export function useScrollFireworks() {
     }
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       triggers.forEach((t) => t.kill());
     };
   }, []);

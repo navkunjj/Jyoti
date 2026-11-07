@@ -65,7 +65,7 @@ export class EmitterManager {
         size: 1.8 + Math.random() * 1.4,
         life: Math.floor(45 + Math.random() * 35),
         drag: 0.962,
-        gravity: 0.05,
+        gravity: 0,
         trailLength: 4,
         flicker: Math.random() < 0.2,
       });
@@ -103,7 +103,7 @@ export class EmitterManager {
         size: 2.2 + Math.random() * 1.5,
         life: Math.floor(55 + Math.random() * 40),
         drag: 0.968,
-        gravity: 0.065,
+        gravity: 0,
         trailLength: 6,
         hasCrackles: Math.random() < 0.3,
         flicker: Math.random() < 0.35,
@@ -138,7 +138,7 @@ export class EmitterManager {
         size: 1.6 + Math.random() * 1.4,
         life: Math.floor(75 + Math.random() * 45),
         drag: 0.978,
-        gravity: 0.08,
+        gravity: 0,
         trailLength: 6,
         isWillow: true,
         flicker: Math.random() < 0.4,
@@ -172,7 +172,7 @@ export class EmitterManager {
         size: 1.4 + Math.random() * 1.8,
         life: Math.floor(25 + Math.random() * 30),
         drag: 0.94,
-        gravity: 0.04,
+        gravity: 0,
         trailLength: 3,
         flicker: true,
         hasCrackles: true,
@@ -222,7 +222,7 @@ export class EmitterManager {
             size: 1.2 + Math.random() * 1.2,
             life: Math.floor(14 + Math.random() * 18),
             drag: 0.92,
-            gravity: 0.06,
+            gravity: 0,
             trailLength: 2,
             flicker: true,
           });
@@ -283,7 +283,7 @@ export class EmitterManager {
             size: 1.6 + Math.random() * 1.5,
             life: Math.floor(35 + Math.random() * 25),
             drag: 0.972,
-            gravity: 0.32, // high gravity causes beautiful parabolic falling fountain cascade
+            gravity: 0, // Zero gravity
             trailLength: 3,
             flicker: Math.random() < 0.4,
           });
