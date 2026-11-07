@@ -21,3 +21,4 @@ export const FireworksController = {
   setIntensity: (intensity: 'low' | 'medium' | 'high') => fireworks.setIntensity(intensity),
   getStats: () => fireworks.getStats(),
 };
+

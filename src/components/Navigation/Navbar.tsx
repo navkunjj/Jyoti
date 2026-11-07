@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
 import { Volume2, VolumeX, Menu, X } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
+import { useRouter } from '../../router';
 
 interface NavbarProps {
-  onNavigate: (sectionId: string) => void;
-  activeSection: string;
+  onNavigate?: (sectionId: string) => void;
+  activeSection?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const { pathname, navigate } = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,12 +29,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
   };
 
   const navLinks = [
-    { id: 'welcome', label: 'Home' },
-    { id: 'art', label: 'Traditions' },
-    { id: 'across-india', label: 'Across India' },
-    { id: 'celebration', label: 'Stories' },
-    { id: 'wishes', label: 'Wishes' },
+    { id: 'welcome', label: 'Home', path: '/' },
+    { id: 'explore-india', label: 'Explore India', path: '/explore-india' },
+    { id: 'art', label: 'Traditions', path: '/#art' },
+    { id: 'across-india', label: 'Across India', path: '/#across-india' },
+    { id: 'celebration', label: 'Stories', path: '/#celebration' },
+    { id: 'wishes', label: 'Wishes', path: '/#wishes' },
   ];
+
+  const handleLinkClick = (link: { id: string; label: string; path: string }) => {
+    setMobileMenuOpen(false);
+
+    if (link.id === 'explore-india') {
+      navigate('/explore-india');
+      return;
+    }
+
+    if (link.id === 'welcome' && pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (pathname !== '/') {
+      navigate(link.path);
+    } else {
+      if (onNavigate) {
+        onNavigate(link.id);
+      } else {
+        const el = document.getElementById(link.id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <>
@@ -46,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
         <div className="max-w-7xl mx-auto px-6 sm:px-10 flex items-center justify-between">
           {/* Brand Logo & Editorial Typography */}
           <button
-            onClick={() => onNavigate('welcome')}
+            onClick={() => navigate('/')}
             className="group flex items-center space-x-3 text-left focus:outline-none"
             aria-label="JYOTI Home"
           >
@@ -62,22 +90,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
           </button>
 
           {/* Clean Editorial Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-9 lg:space-x-12">
+          <nav className="hidden md:flex items-center space-x-7 lg:space-x-10">
             {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
+              const isActive =
+                link.id === 'explore-india'
+                  ? pathname.startsWith('/explore-india')
+                  : pathname === '/' && activeSection === link.id;
+
               return (
                 <button
                   key={link.id}
-                  onClick={() => onNavigate(link.id)}
-                  className={`text-xs uppercase tracking-[0.24em] transition-colors duration-300 relative py-1 focus:outline-none ${
+                  onClick={() => handleLinkClick(link)}
+                  className={`text-xs uppercase tracking-[0.22em] transition-colors duration-300 relative py-1 focus:outline-none ${
                     isActive
                       ? 'text-[#F3EAE2] font-medium'
-                      : 'text-[#F3EAE2]/70 hover:text-[#E98EAF]'
+                      : 'text-[#F3EAE2]/70 hover:text-[#E8A1BC]'
                   }`}
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-[1px] bg-[#E98EAF]" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-[1.5px] bg-[#E8A1BC]" />
                   )}
                 </button>
               );
@@ -90,14 +122,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
               onClick={toggleSound}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border focus:outline-none ${
                 isPlayingAudio
-                  ? 'border-[#E98EAF]/70 text-[#F4C4D2] bg-[#E98EAF]/10'
+                  ? 'border-[#E8A1BC]/70 text-[#F4C4D2] bg-[#E8A1BC]/10'
                   : 'border-[#A99BBF]/20 text-[#A99BBF] hover:text-[#F3EAE2] hover:border-[#A99BBF]/50'
               }`}
               title={isPlayingAudio ? 'Mute ambient soundscape' : 'Play meditative soundscape'}
               aria-label={isPlayingAudio ? 'Mute soundscape' : 'Play soundscape'}
             >
               {isPlayingAudio ? (
-                <Volume2 className="w-4 h-4 text-[#E98EAF]" />
+                <Volume2 className="w-4 h-4 text-[#E8A1BC]" />
               ) : (
                 <VolumeX className="w-4 h-4" />
               )}
@@ -111,12 +143,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
               className="w-8 h-8 rounded-full flex items-center justify-center border border-[#A99BBF]/25 text-[#A99BBF]"
               aria-label="Toggle sound"
             >
-              {isPlayingAudio ? <Volume2 className="w-3.5 h-3.5 text-[#E98EAF]" /> : <VolumeX className="w-3.5 h-3.5" />}
+              {isPlayingAudio ? <Volume2 className="w-3.5 h-3.5 text-[#E8A1BC]" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 text-[#F3EAE2] hover:text-[#E98EAF] focus:outline-none"
+              className="p-1.5 text-[#F3EAE2] hover:text-[#E8A1BC] focus:outline-none"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -143,12 +175,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => {
-                onNavigate(link.id);
-                setMobileMenuOpen(false);
-              }}
+              onClick={() => handleLinkClick(link)}
               className={`text-sm tracking-[0.24em] uppercase py-2.5 transition-colors ${
-                activeSection === link.id ? 'text-[#E98EAF] font-medium' : 'text-[#F3EAE2]/80 hover:text-[#F4C4D2]'
+                (link.id === 'explore-india' && pathname.startsWith('/explore-india')) ||
+                (pathname === '/' && activeSection === link.id)
+                  ? 'text-[#E8A1BC] font-medium'
+                  : 'text-[#F3EAE2]/80 hover:text-[#F4C4D2]'
               }`}
             >
               {link.label}

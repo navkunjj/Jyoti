@@ -11,3 +11,4 @@ export const DEFAULT_FIREWORKS_CONFIG: FireworksConfig = {
 };
 
 export const FIREWORKS_PALETTES = PALETTE;
+
