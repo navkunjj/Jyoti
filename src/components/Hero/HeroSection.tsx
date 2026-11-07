@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { LotusIcon } from '../UI/LotusIcon';
+import { DiyaLogo } from '../UI/DiyaLogo';
 import { FloatingPetals } from './FloatingPetals';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
@@ -155,9 +155,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
           <span className="w-8 sm:w-12 h-[1px] bg-[#E98EAF]/50" />
         </div>
 
-        {/* Elegant Lotus Symbol */}
-        <div className="hero-lotus mb-4">
-          <LotusIcon size={46} glow />
+        {/* Sacred Diya Emblem (Logo & Sign of JYOTI) */}
+        <div className="hero-lotus mb-4 flex justify-center">
+          <DiyaLogo className="w-16 sm:w-20 md:w-24 h-auto" glow />
         </div>
 
         {/* Main Grand Heading: JYOTI */}

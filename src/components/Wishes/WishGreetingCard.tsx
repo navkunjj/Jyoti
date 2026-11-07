@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LotusIcon } from '../UI/LotusIcon';
+import { DiyaLogo } from '../UI/DiyaLogo';
 import { Copy, Check, Send } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
 import { fireworks } from '../../fireworks';
@@ -200,7 +200,7 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
           <div>
             <div className="flex items-center justify-between border-b border-[#A99BBF]/15 pb-4 mb-5">
               <div className="flex items-center space-x-2.5">
-                <LotusIcon size={24} glow />
+                <DiyaLogo className="w-7 h-auto" glow />
                 <span className="font-serif tracking-[0.22em] text-lg text-[#F3EAE2]">
                   JYOTI
                 </span>

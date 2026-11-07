@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { InteractiveDiya } from './InteractiveDiya';
 import { WishGreetingCard } from './WishGreetingCard';
-import { LotusIcon } from '../UI/LotusIcon';
+import { DiyaLogo } from '../UI/DiyaLogo';
 
 interface FloatingLantern {
   id: number;
@@ -83,7 +83,7 @@ export const WishesSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <span className="w-12 h-[1px] bg-gradient-to-r from-transparent to-[#E98EAF]" />
-            <LotusIcon size={26} glow />
+            <DiyaLogo className="w-9 h-auto" glow />
             <span className="w-12 h-[1px] bg-gradient-to-l from-transparent to-[#E98EAF]" />
           </div>
 

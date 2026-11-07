@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { ArrowUp, Mail } from 'lucide-react';
+import { DiyaLogo } from '../UI/DiyaLogo';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -77,9 +78,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
       <div className="max-w-7xl mx-auto w-full relative z-10 space-y-6">
         {/* Main Row: Brand, Navigation & Back to Top */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
-          {/* Brand & Tagline */}
+          {/* Brand & Tagline with Diya Logo */}
           <div>
             <div className="flex items-center space-x-3">
+              <DiyaLogo className="w-8 h-auto" glow />
               <span className="font-sans font-semibold text-xl tracking-[0.2em] text-white uppercase">
                 JYOTI
               </span>
@@ -161,7 +163,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
             </a>
             <span className="text-white/20">/</span>
             <a
-              href="https://www.linkedin.com/in/navkunjj"
+              href="https://www.linkedin.com/in/navkunj-utpal/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-1.5 hover:text-white transition-colors"

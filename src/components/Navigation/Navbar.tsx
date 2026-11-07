@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LotusIcon } from '../UI/LotusIcon';
+import { DiyaLogo } from '../UI/DiyaLogo';
 import { Volume2, VolumeX, Menu, X } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
 
@@ -50,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
             className="group flex items-center space-x-3 text-left focus:outline-none"
             aria-label="JYOTI Home"
           >
-            <LotusIcon className="w-7 h-7 text-[#F4C4D2] transition-transform duration-500 group-hover:scale-105" glow />
+            <DiyaLogo className="w-8 sm:w-9 h-auto transition-transform duration-500 group-hover:scale-105" glow />
             <div className="flex flex-col">
               <span className="font-serif text-2xl tracking-[0.24em] text-[#F3EAE2] transition-colors group-hover:text-[#F4C4D2] font-normal leading-tight">
                 JYOTI
@@ -133,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
       >
         <div className="flex flex-col space-y-6 text-center max-w-xs mx-auto w-full">
           <div className="flex justify-center mb-1">
-            <LotusIcon size={36} glow />
+            <DiyaLogo className="w-12 h-auto" glow />
           </div>
           <span className="font-serif text-2xl tracking-[0.25em] text-[#F3EAE2]">
             JYOTI
