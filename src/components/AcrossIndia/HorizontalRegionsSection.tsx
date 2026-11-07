@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const HorizontalRegionsSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -86,21 +87,19 @@ export const HorizontalRegionsSection: React.FC = () => {
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const isDesktop = window.innerWidth >= 768;
-
     const ctx = gsap.context(() => {
       const cards = cardsRef.current.filter(Boolean) as HTMLElement[];
       const totalCards = cards.length;
       if (totalCards <= 1) return;
 
-      if (isDesktop && !prefersReducedMotion) {
-        // Desktop Experience: Pinned 3D Parallax Stacking Cards
-        // Card 0 starts in place. Each subsequent card rises from yPercent: 110 and stacks over previous card.
-        const scrollDistance = (totalCards - 1) * window.innerHeight * 0.75;
+      if (!prefersReducedMotion) {
+        // Total pinned scroll distance: page stays stuck while user scrubs through cards
+        const scrollDistance = totalCards * window.innerHeight * 1.05;
 
+        // Master 3D Scrub Timeline
         const tl = gsap.timeline({
           scrollTrigger: {
-            id: 'across-india-deck',
+            id: 'across-india-3d-deck',
             trigger: container,
             start: 'top top',
             end: () => `+=${scrollDistance}`,
@@ -109,66 +108,118 @@ export const HorizontalRegionsSection: React.FC = () => {
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
-              const raw = self.progress * (totalCards - 1);
-              const idx = Math.min(totalCards - 1, Math.round(raw));
+              const raw = self.progress * totalCards;
+              const idx = Math.min(totalCards - 1, Math.floor(raw));
               setActiveIndex(idx);
             },
           },
         });
 
-        // Initialize positions: card 0 rests; cards 1..N-1 are positioned below
+        // 3D Corner Entry Coordinates:
+        // Cards enter from the corner: small (scale: 0.35), faded (opacity: 0), blurred, rotated in 3D perspective
+        // They fly into the exact MIDDLE: scale: 1, opacity: 1, unblurred, fully focused and readable
+        // Then exit towards the opposite corner as the next card swoops in.
+        const cornerConfigs = [
+          // Card 0: Starts in middle
+          { enterX: 0, enterY: 0, enterRotY: 0, exitX: 42, exitY: -35, exitRotY: -20 },
+          // Card 1: Enters from bottom-left corner, exits to top-right
+          { enterX: -42, enterY: 35, enterRotY: 22, exitX: 42, exitY: -35, exitRotY: -20 },
+          // Card 2: Enters from bottom-right corner, exits to top-left
+          { enterX: 42, enterY: 35, enterRotY: -22, exitX: -42, exitY: -35, exitRotY: 20 },
+          // Card 3: Enters from bottom-left corner, rests in middle
+          { enterX: -42, enterY: 35, enterRotY: 22, exitX: 0, exitY: 0, exitRotY: 0 },
+        ];
+
+        // 1. Initial State for all cards
         cards.forEach((card, i) => {
-          if (i > 0) {
-            gsap.set(card, { yPercent: 115, scale: 1, opacity: 0.9 });
+          if (i === 0) {
+            // Card 0 starts perfectly focused in the middle
+            gsap.set(card, {
+              xPercent: 0,
+              yPercent: 0,
+              scale: 1,
+              opacity: 1,
+              rotateY: 0,
+              rotateX: 0,
+              rotateZ: 0,
+              filter: 'blur(0px) brightness(1)',
+              zIndex: 20,
+            });
+          } else {
+            // Subsequent cards wait in their respective corner: small, faded, rotated in 3D
+            const cfg = cornerConfigs[i];
+            gsap.set(card, {
+              xPercent: cfg.enterX,
+              yPercent: cfg.enterY,
+              scale: 0.32,
+              opacity: 0,
+              rotateY: cfg.enterRotY,
+              rotateX: 12,
+              rotateZ: cfg.enterRotY > 0 ? -6 : 6,
+              filter: 'blur(8px) brightness(0.3)',
+              zIndex: 10 + i,
+            });
           }
         });
 
-        for (let i = 1; i < totalCards; i++) {
+        // 2. Build Choreographed Transitions
+        // Each card holds focus in the middle, then transitions
+        for (let i = 0; i < totalCards - 1; i++) {
           const currentCard = cards[i];
-          const prevCard = cards[i - 1];
+          const nextCard = cards[i + 1];
+          const currentCfg = cornerConfigs[i];
+          const nextCfg = cornerConfigs[i + 1];
 
-          // Current card rises up to overlap previous card
+          const transitionLabel = `trans-${i}`;
+
+          // A. Hold period where current card remains stationary and focused in middle
+          tl.to(currentCard, { duration: 0.5 });
+
+          // B. Current card flies away into the opposite corner (faded, small, rotated)
           tl.to(
             currentCard,
             {
-              yPercent: 0,
-              opacity: 1,
+              xPercent: currentCfg.exitX,
+              yPercent: currentCfg.exitY,
+              scale: 0.32,
+              opacity: 0,
+              rotateY: currentCfg.exitRotY,
+              rotateX: -12,
+              rotateZ: currentCfg.exitRotY > 0 ? 6 : -6,
+              filter: 'blur(8px) brightness(0.3)',
               ease: 'power2.inOut',
               duration: 1.2,
+              zIndex: 10 + i,
             },
-            `step-${i}`
+            transitionLabel
           );
 
-          // Previous card gently scales down and dims into the background stack
+          // C. Next card swoops in from the corner directly into the MIDDLE
           tl.to(
-            prevCard,
+            nextCard,
             {
-              scale: 0.94,
-              filter: 'brightness(0.35) blur(1.5px)',
+              xPercent: 0,
+              yPercent: 0,
+              scale: 1,
+              opacity: 1,
+              rotateY: 0,
+              rotateX: 0,
+              rotateZ: 0,
+              filter: 'blur(0px) brightness(1)',
               ease: 'power2.inOut',
               duration: 1.2,
+              zIndex: 30 + i,
             },
-            `step-${i}`
+            transitionLabel
           );
         }
+
+        // Final hold for the last card so it stays focused in the middle before unpinning
+        tl.to(cards[totalCards - 1], { duration: 0.7 });
       } else {
-        // Mobile / Reduced Motion: Fluid vertical entrance reveals for each card
+        // Fallback for reduced motion: clean sequential display
         cards.forEach((card) => {
-          gsap.fromTo(
-            card,
-            { opacity: 0, y: 40 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.9,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: card,
-                start: 'top 85%',
-                toggleActions: 'play none none reverse',
-              },
-            }
-          );
+          gsap.set(card, { opacity: 1, scale: 1, xPercent: 0, yPercent: 0 });
         });
       }
     }, container);
@@ -181,19 +232,15 @@ export const HorizontalRegionsSection: React.FC = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const st = ScrollTrigger.getById('across-india-deck');
+    const st = ScrollTrigger.getById('across-india-3d-deck');
     if (st) {
+      // Calculate target progress where this card is fully focused in the middle
       const targetProgress = index / (regions.length - 1);
-      const targetScroll = st.start + targetProgress * (st.end - st.start);
+      const targetScroll = st.start + targetProgress * (st.end - st.start) * 0.92;
       window.scrollTo({
         top: targetScroll,
         behavior: 'smooth',
       });
-    } else {
-      const targetCard = cardsRef.current[index];
-      if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
     }
   };
 
@@ -201,11 +248,15 @@ export const HorizontalRegionsSection: React.FC = () => {
     <section
       id="across-india"
       ref={containerRef}
-      className="relative w-full bg-[#061116] text-[#F3EAE2] overflow-hidden select-none min-h-screen py-16 md:py-8 flex flex-col justify-center"
+      className="relative w-full bg-[#061116] text-[#F3EAE2] overflow-hidden select-none min-h-screen py-12 md:py-6 flex flex-col justify-center"
       aria-label="Chapter 03 Traditions Across India"
     >
       {/* Background Subtle Atmosphere */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-[#E98EAF]/10 via-[#FFE29A]/5 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-gradient-to-tr from-[#E98EAF]/10 via-[#FFE29A]/5 to-transparent blur-3xl pointer-events-none" />
+
+      {/* Decorative 3D Corner Ambient Flares */}
+      <div className="absolute bottom-8 left-8 w-44 h-44 rounded-full bg-[#E98EAF]/10 blur-2xl pointer-events-none" />
+      <div className="absolute top-12 right-8 w-44 h-44 rounded-full bg-[#FFE29A]/10 blur-2xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto w-full px-6 sm:px-12 relative z-10 flex flex-col h-full justify-between">
         {/* Editorial Section Header */}
@@ -245,19 +296,25 @@ export const HorizontalRegionsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Card Deck Container */}
-        {/* On desktop: fixed-height stacking stage where cards overlap via GSAP scrub */}
-        {/* On mobile: standard vertical flow of cards */}
-        <div className="relative w-full max-w-5xl mx-auto min-h-[580px] md:h-[580px] lg:h-[580px]">
+        {/* 3D Perspective Stage Container */}
+        {/* The stage holds all cards at the center; GSAP swoops each card from the corner into the middle */}
+        <div
+          ref={stageRef}
+          className="relative w-full max-w-5xl mx-auto h-[600px] sm:h-[640px] md:h-[580px] flex items-center justify-center"
+          style={{ perspective: '1400px', transformStyle: 'preserve-3d' }}
+        >
           {regions.map((region, idx) => (
             <article
               key={region.id}
               ref={(el) => (cardsRef.current[idx] = el)}
-              style={{ zIndex: 10 + idx }}
-              className="w-full h-full md:absolute md:inset-0 mb-8 md:mb-0 rounded-3xl overflow-hidden border border-[#A99BBF]/20 bg-[#0A1B22]/95 backdrop-blur-md shadow-[0_25px_60px_rgba(0,0,0,0.85)] flex flex-col lg:flex-row transition-shadow duration-500 hover:border-[#FFE29A]/30"
+              className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border border-[#A99BBF]/25 bg-[#0A1B22]/95 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex flex-col lg:flex-row transform-gpu origin-center will-change-transform transition-shadow duration-500 hover:border-[#FFE29A]/40"
+              style={{ transformStyle: 'preserve-3d' }}
             >
               {/* Left Column: Authentic Heritage Photography */}
-              <div className="relative w-full lg:w-[48%] h-64 sm:h-72 lg:h-full overflow-hidden flex-shrink-0">
+              <div
+                className="relative w-full lg:w-[48%] h-64 sm:h-72 lg:h-full overflow-hidden flex-shrink-0"
+                style={{ transform: 'translateZ(25px)' }}
+              >
                 <img
                   src={region.image}
                   alt={region.title}
@@ -273,7 +330,10 @@ export const HorizontalRegionsSection: React.FC = () => {
               </div>
 
               {/* Right Column: Narrative Lore & Cultural Significance */}
-              <div className="w-full lg:w-[52%] p-6 sm:p-8 lg:p-10 flex flex-col justify-between overflow-y-auto space-y-4">
+              <div
+                className="w-full lg:w-[52%] p-6 sm:p-8 lg:p-10 flex flex-col justify-between overflow-y-auto space-y-4"
+                style={{ transform: 'translateZ(18px)' }}
+              >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] uppercase tracking-[0.25em] text-[#E98EAF] font-medium">

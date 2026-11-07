@@ -82,6 +82,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         '-=0.5'
       );
 
+      // 2. Cinematic GSAP Scroll Parallax & Atmosphere on Hero
+      if (!prefersReducedMotion && containerRef.current && bgImageRef.current) {
+        gsap.to(bgImageRef.current, {
+          yPercent: 18,
+          scale: 1.08,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+        });
+      }
     }, containerRef);
 
     return () => ctx.revert();
