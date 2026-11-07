@@ -3,7 +3,6 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { RouterProvider, useRouter } from './router';
 import { Navbar } from './components/Navigation/Navbar';
 import { LeftChapterNav } from './components/ChapterNav/LeftChapterNav';
 import { HeroSection } from './components/Hero/HeroSection';
@@ -14,13 +13,9 @@ import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
 import { FireworksCanvas, useScrollFireworks } from './fireworks';
 
-import { ExploreIndiaPage } from './pages/ExploreIndiaPage';
-import { RegionalExperiencePage } from './pages/RegionalExperiencePage';
-
 gsap.registerPlugin(ScrollTrigger);
 
-function AppContent() {
-  const { pathname, params, navigate } = useRouter();
+export function App() {
   const [activeChapter, setActiveChapter] = useState('welcome');
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -47,37 +42,36 @@ function AppContent() {
     gsap.ticker.add(updateLenis);
     gsap.ticker.lagSmoothing(0);
 
-    // 2. Set up ScrollTriggers for active chapter tracking on homepage
-    if (pathname === '/') {
-      const sections = ['welcome', 'art', 'across-india', 'celebration', 'wishes'];
+    // 2. Set up ScrollTriggers for active chapter tracking
+    const sections = ['welcome', 'art', 'across-india', 'celebration', 'wishes'];
 
-      sections.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 50%',
-          end: 'bottom 50%',
-          onEnter: () => setActiveChapter(id),
-          onEnterBack: () => setActiveChapter(id),
-        });
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 50%',
+        end: 'bottom 50%',
+        onEnter: () => setActiveChapter(id),
+        onEnterBack: () => setActiveChapter(id),
       });
-    }
+    });
+
+    // Ensure all ScrollTrigger offsets are refreshed with Lenis
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 150);
 
     return () => {
+      clearTimeout(refreshTimer);
       gsap.ticker.remove(updateLenis);
       lenis.destroy();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [pathname]);
+  }, []);
 
   const handleNavigate = (sectionId: string) => {
-    if (pathname !== '/') {
-      navigate(`/#${sectionId}`);
-      return;
-    }
-
     const target = document.getElementById(sectionId);
     if (!target) return;
 
@@ -88,67 +82,41 @@ function AppContent() {
     }
   };
 
-  // Determine view based on route
-  const isExploreIndiaMain = pathname === '/explore-india';
-  const isRegionalDetail = pathname.startsWith('/explore-india/') && Boolean(params.region);
-
   return (
     <div className="relative min-h-screen bg-[#061116] text-[#F3EAE2] overflow-x-hidden selection:bg-[#E98EAF]/30 selection:text-[#F3EAE2]">
-      {/* Shared Fullscreen Fireworks Canvas */}
+      {/* Shared Fullscreen Fireworks Canvas (Automatic scroll-driven, pointer-events: none) */}
       <FireworksCanvas />
 
-      {/* Floating Top Navigation Bar */}
+      {/* 1. Floating Top Navigation Bar */}
       <Navbar onNavigate={handleNavigate} activeSection={activeChapter} />
 
-      {/* View 1: Explore India Regional Deep Dive (/explore-india/:region) */}
-      {isRegionalDetail && (
-        <RegionalExperiencePage regionSlug={params.region} />
-      )}
+      {/* 2. Fixed Left Vertical Chapter Navigation */}
+      <LeftChapterNav
+        activeChapter={activeChapter}
+        onSelectChapter={handleNavigate}
+      />
 
-      {/* View 2: Explore India Cultural Atlas Main (/explore-india) */}
-      {isExploreIndiaMain && (
-        <ExploreIndiaPage />
-      )}
+      {/* 3. Main Storytelling Chapters */}
+      <main>
+        {/* Chapter 01 — Welcome Hero */}
+        <HeroSection onBeginJourney={() => handleNavigate('art')} />
 
-      {/* View 3: Primary Homepage (/) */}
-      {!isExploreIndiaMain && !isRegionalDetail && (
-        <>
-          {/* Fixed Left Vertical Chapter Navigation */}
-          <LeftChapterNav
-            activeChapter={activeChapter}
-            onSelectChapter={handleNavigate}
-          />
+        {/* Chapter 02 — The Art of Diwali */}
+        <ArtSection />
 
-          <main>
-            {/* Chapter 01 — Welcome Hero */}
-            <HeroSection onBeginJourney={() => handleNavigate('art')} />
+        {/* Chapter 03 — Diwali Across India (Pinned Horizontal Scroll) */}
+        <HorizontalRegionsSection />
 
-            {/* Chapter 02 — The Art of Diwali */}
-            <ArtSection />
+        {/* Chapter 04 — The Celebration (Emotions & Rituals) */}
+        <CelebrationSection />
 
-            {/* Chapter 03 — Diwali Across India (Pinned Horizontal Scroll) */}
-            <HorizontalRegionsSection />
+        {/* Chapter 05 — Send Wishes & Interactive Diya */}
+        <WishesSection />
+      </main>
 
-            {/* Chapter 04 — The Celebration (Emotions & Rituals) */}
-            <CelebrationSection />
-
-            {/* Chapter 05 — Send Wishes & Interactive Diya */}
-            <WishesSection />
-          </main>
-        </>
-      )}
-
-      {/* Graceful Global Footer */}
+      {/* 4. Graceful Footer */}
       <Footer onNavigate={handleNavigate} />
     </div>
-  );
-}
-
-export function App() {
-  return (
-    <RouterProvider>
-      <AppContent />
-    </RouterProvider>
   );
 }
 

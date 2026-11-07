@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LotusIcon } from '../UI/LotusIcon';
 import { FloatingPetals } from './FloatingPetals';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
 import { fireworks } from '../../fireworks';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface HeroSectionProps {
   onBeginJourney: () => void;
@@ -19,23 +22,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
   const [diyaLit, setDiyaLit] = useState(true);
 
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const ctx = gsap.context(() => {
-      // 1. Cinematic subtle zoom out on load for background
+      // 1. Cinematic subtle entrance on page load
+      const entranceTl = gsap.timeline({ delay: 0.2 });
+
       if (bgImageRef.current) {
-        gsap.fromTo(
+        entranceTl.fromTo(
           bgImageRef.current,
           { scale: 1.06, filter: 'brightness(0.8)' },
           { scale: 1, filter: 'brightness(1)', duration: 2.2, ease: 'power2.out' }
         );
       }
 
-      // 2. Editorial staggered reveal of hero content
-      const tl = gsap.timeline({ delay: 0.2 });
-
-      tl.fromTo(
+      entranceTl.fromTo(
         '.hero-eyebrow',
         { y: 16, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' }
+        { y: 0, opacity: 1, duration: 1.1, ease: 'power3.out' },
+        '-=1.8'
       )
       .fromTo(
         '.hero-lotus',
@@ -73,6 +81,65 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         { opacity: 1, duration: 1.2, ease: 'power2.out' },
         '-=0.5'
       );
+
+      // 2. Cinematic Pinned Hero with Layered Scroll-Reveal Parallax
+      // The hero stays visually stationary while Chapter 02 slides upward over it
+      if (!prefersReducedMotion && containerRef.current) {
+        const getHeroHeight = () => containerRef.current?.offsetHeight || window.innerHeight;
+
+        const pinTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: () => `+=${getHeroHeight()}`,
+            pin: true,
+            pinSpacing: false, // Allows subsequent content to naturally rise over the pinned hero
+            scrub: 1, // Smooth sync with Lenis smooth scroll
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Cinematic background subtle zoom & gentle downward parallax
+        if (bgImageRef.current) {
+          pinTimeline.to(
+            bgImageRef.current,
+            {
+              scale: 1.08,
+              yPercent: 6,
+              filter: 'brightness(0.72)',
+              ease: 'none',
+            },
+            0
+          );
+        }
+
+        // Foreground content restrained upward parallax drift & gentle fade
+        if (contentRef.current) {
+          pinTimeline.to(
+            contentRef.current,
+            {
+              yPercent: -18,
+              opacity: 0.35,
+              ease: 'none',
+            },
+            0
+          );
+        }
+
+        // Terrace Diya subtle parallax
+        if (diyaWrapperRef.current) {
+          pinTimeline.to(
+            diyaWrapperRef.current,
+            {
+              yPercent: -12,
+              opacity: 0.3,
+              ease: 'none',
+            },
+            0
+          );
+        }
+      }
     }, containerRef);
 
     return () => ctx.revert();
@@ -84,7 +151,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
 
     if (nextState) {
       soundscape.playDiyaChime();
-      // Cinematic phuljhari sparks at terrace diya in world coordinates
       const diyaX = typeof window !== 'undefined' ? (window.innerWidth < 640 ? window.innerWidth * 0.5 : window.innerWidth * 0.18) : 200;
       const diyaY = typeof window !== 'undefined' ? window.innerHeight * 0.88 : 600;
       fireworks.sparkler(diyaX, diyaY, { durationMs: 2400 });
@@ -95,7 +161,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
     <section
       id="welcome"
       ref={containerRef}
-      className="relative w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center"
+      className="relative w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center z-10"
       aria-label="Diwali Welcome Hero"
     >
       {/* 1. Fullscreen Cinematic Background Edge-to-Edge */}
@@ -107,7 +173,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
           className="w-full h-full object-cover object-center pointer-events-none will-change-transform"
         />
 
-        {/* Ambient atmospheric contrast overlays to guarantee high editorial readability */}
+        {/* Atmospheric contrast overlays to guarantee high editorial readability */}
         <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#061116]/80 via-[#061116]/30 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#061116]/30 to-[#061116]/75 pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#061116]/85 via-[#061116]/35 to-transparent pointer-events-none" />
@@ -119,7 +185,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 3. Center Storytelling Hero Content */}
       <div
         ref={contentRef}
-        className="relative z-20 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12"
+        className="relative z-20 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12 will-change-transform"
       >
         {/* Eyebrow: A FESTIVAL OF LIGHTS */}
         <div className="hero-eyebrow flex items-center justify-center space-x-3 mb-5">
@@ -167,7 +233,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 4. Terrace Diya anchored to courtyard foreground */}
       <div
         ref={diyaWrapperRef}
-        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-20 flex flex-col items-center"
+        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-20 flex flex-col items-center will-change-transform"
       >
         <DiyaFlame
           isLit={diyaLit}

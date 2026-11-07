@@ -145,7 +145,7 @@ export const ArtSection: React.FC = () => {
     <section
       id="art"
       ref={sectionRef}
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-10 lg:px-16 bg-gradient-to-b from-[#061116] via-[#0A1B22] to-[#102C38] overflow-hidden select-none"
+      className="relative z-20 w-full py-28 sm:py-36 px-6 sm:px-10 lg:px-16 bg-[#061116] bg-gradient-to-b from-[#061116] via-[#0A1B22] to-[#102C38] overflow-hidden select-none border-t border-[#A99BBF]/20 shadow-[0_-30px_70px_rgba(0,0,0,0.95)]"
       aria-label="Chapter 02 The Art of Diwali"
     >
       <div className="max-w-7xl mx-auto relative z-10">
