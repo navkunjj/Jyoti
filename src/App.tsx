@@ -12,6 +12,7 @@ import { CelebrationSection } from './components/Celebration/CelebrationSection'
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
 import { CrackerRocket } from './components/Rocket/CrackerRocket';
+import { FireworksCanvas, FireworksDebugPanel } from './fireworks';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,6 +76,15 @@ export function App() {
 
   return (
     <div className="relative min-h-screen bg-[#061116] text-[#F3EAE2] overflow-x-hidden selection:bg-[#E98EAF]/30 selection:text-[#F3EAE2]">
+      {/* Shared Fullscreen Fireworks Canvas */}
+      <FireworksCanvas />
+
+      {/* Development Debug HUD */}
+      <FireworksDebugPanel />
+
+      {/* Interactive Diwali Cracker Rocket */}
+      <CrackerRocket />
+
       {/* 1. Floating Top Navigation Bar */}
       <Navbar onNavigate={handleNavigate} activeSection={activeChapter} />
 
@@ -83,9 +93,6 @@ export function App() {
         activeChapter={activeChapter}
         onSelectChapter={handleNavigate}
       />
-
-      {/* 3. Interactive Diwali Cracker Rocket across the entire website */}
-      <CrackerRocket />
 
       {/* 3. Main Storytelling Chapters */}
       <main>

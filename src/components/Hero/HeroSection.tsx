@@ -4,6 +4,7 @@ import { LotusIcon } from '../UI/LotusIcon';
 import { FloatingPetals } from './FloatingPetals';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
+import { fireworks } from '../../fireworks';
 import { ArrowDown, Sparkles, Moon } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -100,6 +101,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
 
     if (nextState) {
       soundscape.playDiyaChime();
+      // Phuljhari sparks at terrace diya
+      const diyaX = typeof window !== 'undefined' ? (window.innerWidth < 640 ? window.innerWidth * 0.5 : window.innerWidth * 0.18) : 200;
+      const diyaY = typeof window !== 'undefined' ? window.innerHeight * 0.88 : 600;
+      fireworks.sparkler(diyaX, diyaY, { durationMs: 2200 });
+
       // Throw festive spark embers
       confetti({
         particleCount: 25,

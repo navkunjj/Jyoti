@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
+import { fireworks } from '../../fireworks';
 import { Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -20,6 +21,16 @@ export const InteractiveDiya: React.FC<InteractiveDiyaProps> = ({ onLightChange 
     if (nextState) {
       soundscape.playDiyaChime();
       setBlessingCount((c) => c + 1);
+
+      // Auspicious celebratory firework burst overhead
+      const cx = typeof window !== 'undefined' ? window.innerWidth * 0.5 : 400;
+      const cy = typeof window !== 'undefined' ? window.innerHeight * 0.28 : 250;
+      fireworks.burst(cx, cy, {
+        type: 'chrysanthemum',
+        color: '#FFE29A',
+        secondaryColor: '#E98EAF',
+        particleCount: 85,
+      });
 
       confetti({
         particleCount: 35,

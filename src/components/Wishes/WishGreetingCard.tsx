@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
 import { Sparkles, Copy, Check, Send, Flame } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
+import { fireworks } from '../../fireworks';
 import confetti from 'canvas-confetti';
 
 interface WishGreetingCardProps {
@@ -62,6 +63,18 @@ export const WishGreetingCard: React.FC<WishGreetingCardProps> = ({ onReleaseLan
 
     const lanternText = `${recipient ? `For ${recipient}: ` : ''}${blessingPresets[blessingType].shloka}`;
     onReleaseLantern(lanternText);
+
+    // Launch celebratory rocket accompanying the sky lantern
+    const rx = typeof window !== 'undefined' ? (window.innerWidth * 0.5 + (Math.random() - 0.5) * 120) : 400;
+    fireworks.launch({
+      startX: rx,
+      targetX: rx + (Math.random() - 0.5) * 60,
+      targetY: typeof window !== 'undefined' ? window.innerHeight * 0.18 : 150,
+      type: 'willow',
+      color: '#FFE29A',
+      secondaryColor: '#E98EAF',
+      particleCount: 95,
+    });
   };
 
   const handleCopyWish = () => {
