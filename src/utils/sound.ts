@@ -236,6 +236,84 @@ class SoundscapeManager {
     osc.start(now);
     osc.stop(now + 2.1);
   }
+
+  // Play rocket propulsion whoosh
+  public playRocketWoosh() {
+    this.initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    // Filtered noise swoosh
+    const bufferSize = Math.floor(this.ctx.sampleRate * 0.4);
+    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.4));
+    }
+
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(600, now);
+    filter.frequency.exponentialRampToValueAtTime(2400, now + 0.35);
+    filter.Q.setValueAtTime(3.0, now);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.08, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    noise.start(now);
+  }
+
+  // Play festive cracker burst / explosion sound
+  public playCrackerBurst() {
+    this.initContext();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    // 1. Low Thud / Bass pop
+    const boomOsc = this.ctx.createOscillator();
+    const boomGain = this.ctx.createGain();
+    boomOsc.type = 'sine';
+    boomOsc.frequency.setValueAtTime(140, now);
+    boomOsc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+
+    boomGain.gain.setValueAtTime(0.2, now);
+    boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    boomOsc.connect(boomGain);
+    boomGain.connect(this.ctx.destination);
+    boomOsc.start(now);
+    boomOsc.stop(now + 0.45);
+
+    // 2. High frequency crackles / sparkles (Phuljhari & Lad pops)
+    const crackleCount = 6;
+    for (let i = 0; i < crackleCount; i++) {
+      const crackleTime = now + 0.05 + Math.random() * 0.28;
+      const crackleOsc = this.ctx.createOscillator();
+      const crackleGain = this.ctx.createGain();
+
+      crackleOsc.type = 'square';
+      crackleOsc.frequency.setValueAtTime(1200 + Math.random() * 2000, crackleTime);
+
+      crackleGain.gain.setValueAtTime(0.001, crackleTime);
+      crackleGain.gain.linearRampToValueAtTime(0.04, crackleTime + 0.008);
+      crackleGain.gain.exponentialRampToValueAtTime(0.0001, crackleTime + 0.04);
+
+      crackleOsc.connect(crackleGain);
+      crackleGain.connect(this.ctx.destination);
+
+      crackleOsc.start(crackleTime);
+      crackleOsc.stop(crackleTime + 0.05);
+    }
+  }
 }
 
 export const soundscape = new SoundscapeManager();

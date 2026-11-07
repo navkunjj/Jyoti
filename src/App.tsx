@@ -11,6 +11,7 @@ import { HorizontalRegionsSection } from './components/AcrossIndia/HorizontalReg
 import { CelebrationSection } from './components/Celebration/CelebrationSection';
 import { WishesSection } from './components/Wishes/WishesSection';
 import { Footer } from './components/Footer/Footer';
+import { CrackerRocket } from './components/Rocket/CrackerRocket';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -82,6 +83,9 @@ export function App() {
         activeChapter={activeChapter}
         onSelectChapter={handleNavigate}
       />
+
+      {/* 3. Interactive Diwali Cracker Rocket across the entire website */}
+      <CrackerRocket />
 
       {/* 3. Main Storytelling Chapters */}
       <main>
