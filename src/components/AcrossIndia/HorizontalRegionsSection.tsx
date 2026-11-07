@@ -96,7 +96,7 @@ export const HorizontalRegionsSection: React.FC = () => {
       if (isDesktop && !prefersReducedMotion) {
         // Desktop Experience: Pinned 3D Parallax Stacking Cards
         // Card 0 starts in place. Each subsequent card rises from yPercent: 110 and stacks over previous card.
-        const scrollDistance = (totalCards - 1) * window.innerHeight * 0.9;
+        const scrollDistance = (totalCards - 1) * window.innerHeight * 0.75;
 
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -202,7 +202,7 @@ export const HorizontalRegionsSection: React.FC = () => {
       id="across-india"
       ref={containerRef}
       className="relative w-full bg-[#061116] text-[#F3EAE2] overflow-hidden select-none min-h-screen py-16 md:py-8 flex flex-col justify-center"
-      aria-label="Chapter 02 Traditions Across India"
+      aria-label="Chapter 03 Traditions Across India"
     >
       {/* Background Subtle Atmosphere */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-[#E98EAF]/10 via-[#FFE29A]/5 to-transparent blur-3xl pointer-events-none" />
@@ -214,7 +214,7 @@ export const HorizontalRegionsSection: React.FC = () => {
             <div className="flex items-center space-x-2 mb-2">
               <span className="w-6 h-[1px] bg-[#E98EAF]" />
               <span className="text-[11px] uppercase tracking-[0.32em] text-[#E98EAF] font-medium">
-                Chapter 02 · Sacred Traditions
+                Chapter 03 · Sacred Traditions
               </span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#F3EAE2] font-normal leading-tight">

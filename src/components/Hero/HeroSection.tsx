@@ -82,23 +82,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         '-=0.5'
       );
 
-      // 2. Completely Stationary Pinned Hero:
-      // The hero section remains visually pinned and 100% stationary.
-      // Hero text (JYOTI heading, subtitle, description, CTA button) does NOT move, shift, fade, or blur.
-      // Only the next content section moves upward and covers the hero.
-      if (!prefersReducedMotion && containerRef.current) {
-        const getHeroHeight = () => containerRef.current?.offsetHeight || window.innerHeight;
-
-        ScrollTrigger.create({
-          trigger: containerRef.current,
-          start: 'top top',
-          end: () => `+=${getHeroHeight()}`,
-          pin: true,
-          pinSpacing: false, // Next section naturally scrolls up and overlaps the stationary hero
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-      }
     }, containerRef);
 
     return () => ctx.revert();
@@ -120,7 +103,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
     <section
       id="welcome"
       ref={containerRef}
-      className="relative w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center z-10"
+      className="sticky top-0 z-0 w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center"
       aria-label="Diwali Welcome Hero"
     >
       {/* 1. Fullscreen Cinematic Background Edge-to-Edge */}

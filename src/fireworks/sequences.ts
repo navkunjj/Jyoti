@@ -164,15 +164,15 @@ export function setupScrollFireworks(): () => void {
     );
   }
 
-  // 2. Art Section
-  const artEl = document.getElementById('art');
-  if (artEl) {
+  // 2. Celebration (Stories) Section
+  const celebEl = document.getElementById('celebration');
+  if (celebEl) {
     triggers.push(
       ScrollTrigger.create({
-        trigger: artEl,
+        trigger: celebEl,
         start: 'top 60%',
-        onEnter: () => triggerArtFireworks(),
-        onEnterBack: () => triggerArtFireworks(),
+        onEnter: () => triggerCelebrationFireworks(),
+        onEnterBack: () => triggerCelebrationFireworks(),
       })
     );
   }
@@ -190,20 +190,7 @@ export function setupScrollFireworks(): () => void {
     );
   }
 
-  // 4. Celebration Section
-  const celebEl = document.getElementById('celebration');
-  if (celebEl) {
-    triggers.push(
-      ScrollTrigger.create({
-        trigger: celebEl,
-        start: 'top 60%',
-        onEnter: () => triggerCelebrationFireworks(),
-        onEnterBack: () => triggerCelebrationFireworks(),
-      })
-    );
-  }
-
-  // 5. Wishes Section
+  // 4. Wishes Section
   const wishEl = document.getElementById('wishes');
   if (wishEl) {
     triggers.push(

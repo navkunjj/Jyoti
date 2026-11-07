@@ -104,16 +104,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
               Home
             </button>
             <button
-              onClick={() => onNavigate('across-india')}
-              className="hover:text-white transition-colors focus:outline-none"
-            >
-              Across India
-            </button>
-            <button
               onClick={() => onNavigate('celebration')}
               className="hover:text-white transition-colors focus:outline-none"
             >
               Stories
+            </button>
+            <button
+              onClick={() => onNavigate('across-india')}
+              className="hover:text-white transition-colors focus:outline-none"
+            >
+              Across India
             </button>
             <button
               onClick={() => onNavigate('wishes')}

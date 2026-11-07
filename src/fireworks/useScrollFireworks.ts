@@ -33,19 +33,19 @@ export function useScrollFireworks() {
     // 2. Choreographed Storytelling Triggers via GSAP ScrollTrigger
     const triggers: ScrollTrigger[] = [];
 
-    // A. Hero -> Across India Section Transition
-    const acrossIndiaSection = document.getElementById('across-india');
-    if (acrossIndiaSection) {
+    // A. Hero -> Stories Section Transition
+    const celebrationSection = document.getElementById('celebration');
+    if (celebrationSection) {
       triggers.push(
         ScrollTrigger.create({
-          trigger: acrossIndiaSection,
+          trigger: celebrationSection,
           start: 'top 75%',
           onEnter: () => {
             const now = Date.now();
             if (now - lastBurstTime.current > 1400) {
               lastBurstTime.current = now;
-              // Auspicious weeping golden willow over the regional traditions chapter
-              fireworks.burstInSection('across-india', 0.5, 0.18, {
+              // Auspicious weeping golden willow over the stories chapter
+              fireworks.burstInSection('celebration', 0.5, 0.18, {
                 type: 'willow',
                 color: PALETTE.warmGold,
                 secondaryColor: PALETTE.diyaAmber,
@@ -70,6 +70,9 @@ export function useScrollFireworks() {
         })
       );
     }
+
+    // B. Across India Section
+    const acrossIndiaSection = document.getElementById('across-india');
 
     // B. Across India Section: Direction-Aware Stacking Deck Fireworks
     if (acrossIndiaSection) {
@@ -145,19 +148,18 @@ export function useScrollFireworks() {
       );
     }
 
-    // C. Celebration Section (Human Emotions)
-    const celebrationSection = document.getElementById('celebration');
-    if (celebrationSection) {
+    // C. Traditions Across India Arrival
+    if (acrossIndiaSection) {
       triggers.push(
         ScrollTrigger.create({
-          trigger: celebrationSection,
+          trigger: acrossIndiaSection,
           start: 'top 70%',
           onEnter: () => {
             const now = Date.now();
             if (now - lastBurstTime.current > 1400) {
               lastBurstTime.current = now;
               // Warm golden & electric pink celebratory burst
-              fireworks.burstInSection('celebration', 0.5, 0.15, {
+              fireworks.burstInSection('across-india', 0.5, 0.15, {
                 type: 'chrysanthemum',
                 color: PALETTE.diyaAmber,
                 secondaryColor: PALETTE.lotusPink,

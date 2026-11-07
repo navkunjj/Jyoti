@@ -43,7 +43,7 @@ export function App() {
     gsap.ticker.lagSmoothing(0);
 
     // 2. Set up ScrollTriggers for active chapter tracking
-    const sections = ['welcome', 'across-india', 'celebration', 'wishes'];
+    const sections = ['welcome', 'celebration', 'across-india', 'wishes'];
 
     sections.forEach((id) => {
       const el = document.getElementById(id);
@@ -99,13 +99,13 @@ export function App() {
       {/* 3. Main Storytelling Chapters (The Page that slides up) */}
       <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
         {/* Chapter 01 — Welcome Hero */}
-        <HeroSection onBeginJourney={() => handleNavigate('across-india')} />
+        <HeroSection onBeginJourney={() => handleNavigate('celebration')} />
 
-        {/* Chapter 02 — Traditions Across India */}
-        <HorizontalRegionsSection />
-
-        {/* Chapter 03 — The Celebration (Emotions & Rituals) */}
+        {/* Chapter 02 — Stories & Sacred Rituals */}
         <CelebrationSection />
+
+        {/* Chapter 03 — Traditions Across India */}
+        <HorizontalRegionsSection />
 
         {/* Chapter 04 — Send Wishes & Interactive Diya */}
         <WishesSection />
