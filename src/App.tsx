@@ -98,7 +98,7 @@ export function App() {
       />
 
       {/* 3. Main Storytelling Chapters (The Page that slides up) */}
-      <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-[#A99BBF]/20">
+      <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
         {/* Chapter 01 — Welcome Hero */}
         <HeroSection onBeginJourney={() => handleNavigate('art')} />
 
