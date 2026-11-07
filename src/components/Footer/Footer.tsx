@@ -1,13 +1,35 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { LotusIcon } from '../UI/LotusIcon';
 import { ArrowUp } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
+  onHeightChange?: (height: number) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) => {
   const footerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!footerRef.current) return;
+
+    const measureHeight = () => {
+      if (footerRef.current && onHeightChange) {
+        onHeightChange(footerRef.current.offsetHeight);
+      }
+    };
+
+    measureHeight();
+
+    const resizeObserver = new ResizeObserver(measureHeight);
+    resizeObserver.observe(footerRef.current);
+    window.addEventListener('resize', measureHeight, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', measureHeight);
+    };
+  }, [onHeightChange]);
 
   const scrollToTop = () => {
     onNavigate('welcome');
@@ -25,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
     <footer
       id="site-footer"
       ref={footerRef}
-      className="relative z-20 w-full min-h-[100svh] min-h-[680px] bg-[#040C10] border-t border-[#A99BBF]/20 text-[#F3EAE2] pt-16 sm:pt-20 pb-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden shadow-[0_-30px_70px_rgba(0,0,0,0.95)] flex flex-col justify-between"
+      className="fixed bottom-0 left-0 right-0 z-0 w-full min-h-[100svh] min-h-[680px] bg-[#040C10] text-[#F3EAE2] pt-16 sm:pt-20 pb-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden flex flex-col justify-between"
     >
       {/* Background Subtle Radial Gradient */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-t from-[#102C38]/40 to-transparent blur-3xl pointer-events-none" />

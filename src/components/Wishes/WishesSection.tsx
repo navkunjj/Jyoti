@@ -1,11 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useState } from 'react';
 import { InteractiveDiya } from './InteractiveDiya';
 import { WishGreetingCard } from './WishGreetingCard';
 import { LotusIcon } from '../UI/LotusIcon';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface FloatingLantern {
   id: number;
@@ -14,39 +10,7 @@ interface FloatingLantern {
 }
 
 export const WishesSection: React.FC = () => {
-  const containerRef = useRef<HTMLElement | null>(null);
   const [lanterns, setLanterns] = useState<FloatingLantern[]>([]);
-
-  useEffect(() => {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Pinned Wishes Section with Overlapping Footer Scroll-Reveal:
-    // When the user reaches the bottom of Chapter 05, the wishes section remains
-    // visually stationary while the site footer slides upward and covers it.
-    if (!prefersReducedMotion && containerRef.current) {
-      const getFooterHeight = () => {
-        const footer = document.getElementById('site-footer');
-        return footer ? footer.offsetHeight : window.innerHeight;
-      };
-
-      const trigger = ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'bottom bottom',
-        end: () => `+=${getFooterHeight()}`,
-        pin: true,
-        pinSpacing: false, // Footer naturally scrolls up and overlaps the stationary wishes section
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      });
-
-      return () => {
-        trigger.kill();
-      };
-    }
-  }, []);
 
   const handleReleaseLantern = (wishText: string) => {
     const newLantern: FloatingLantern = {
@@ -65,8 +29,7 @@ export const WishesSection: React.FC = () => {
   return (
     <section
       id="wishes"
-      ref={containerRef}
-      className="relative z-10 w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
+      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
       aria-label="Chapter 05 Send Wishes and Blessings"
     >
       {/* Sky Lanterns Animation Layer */}

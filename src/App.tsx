@@ -17,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function App() {
   const [activeChapter, setActiveChapter] = useState('welcome');
+  const [footerHeight, setFooterHeight] = useState<number>(0);
   const lenisRef = useRef<Lenis | null>(null);
 
   // Initialize automated direction-aware scroll fireworks
@@ -96,8 +97,8 @@ export function App() {
         onSelectChapter={handleNavigate}
       />
 
-      {/* 3. Main Storytelling Chapters */}
-      <main>
+      {/* 3. Main Storytelling Chapters (The Page that slides up) */}
+      <main className="relative z-10 bg-[#061116] shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-[#A99BBF]/20">
         {/* Chapter 01 — Welcome Hero */}
         <HeroSection onBeginJourney={() => handleNavigate('art')} />
 
@@ -112,10 +113,17 @@ export function App() {
 
         {/* Chapter 05 — Send Wishes & Interactive Diya */}
         <WishesSection />
-
-        {/* 4. Graceful Footer (Overlapping Scroll-Reveal Finale) */}
-        <Footer onNavigate={handleNavigate} />
       </main>
+
+      {/* Spacer that allows the page to slide up and reveal the stuck footer */}
+      <div
+        style={{ height: footerHeight ? `${footerHeight}px` : '100vh' }}
+        className="w-full pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* 4. Stuck Footer (Fixed at the bottom underneath the sliding page) */}
+      <Footer onNavigate={handleNavigate} onHeightChange={setFooterHeight} />
     </div>
   );
 }
