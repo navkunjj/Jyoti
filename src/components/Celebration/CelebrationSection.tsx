@@ -89,7 +89,7 @@ export const CelebrationSection: React.FC = () => {
     <section
       id="celebration"
       ref={containerRef}
-      className="relative z-10 w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-[#061116] shadow-[0_-35px_80px_rgba(0,0,0,0.95)] border-t border-white/10 overflow-hidden select-none"
+      className="relative z-20 w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-[#061116]/80 backdrop-blur-sm shadow-[0_-35px_80px_rgba(0,0,0,0.95)] border-t border-white/10 overflow-hidden select-none"
       aria-label="Chapter 02 Stories of Diwali"
     >
       {/* Decorative Rangoli Pattern Watermarks */}
@@ -100,7 +100,7 @@ export const CelebrationSection: React.FC = () => {
         <RangoliPattern size={500} />
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-6xl mx-auto relative z-30">
         {/* Editorial Section Header */}
         <div ref={headerRef} className="text-center max-w-3xl mx-auto mb-20 sm:mb-28">
           <span className="text-xs uppercase tracking-[0.35em] text-[#E98EAF] font-medium block mb-3">

@@ -82,19 +82,41 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         '-=0.5'
       );
 
-      // 2. Cinematic GSAP Scroll Parallax & Atmosphere on Hero
-      if (!prefersReducedMotion && containerRef.current && bgImageRef.current) {
-        gsap.to(bgImageRef.current, {
-          yPercent: 18,
-          scale: 1.08,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
+      // 2. Exact Pinned Hero Scroll Reveal Interaction:
+      // The homepage hero stays pinned and 100% stationary in its screen position.
+      // All hero text (JYOTI heading, subtitle, description, CTA button) and background remain stationary (no movement or animation during scroll).
+      // The incoming section (#celebration) slides upward from below and progressively covers the pinned hero.
+      // Once the next section completely covers the hero, the pin releases and normal scrolling continues.
+      if (!prefersReducedMotion && containerRef.current) {
+        const heroEl = containerRef.current;
+        const getHeroHeight = () => heroEl.offsetHeight || window.innerHeight;
+
+        ScrollTrigger.create({
+          id: 'hero-pinned-reveal',
+          trigger: heroEl,
+          start: 'top top',
+          end: () => `+=${getHeroHeight()}`,
+          pin: true,
+          pinSpacing: false, // Allows subsequent section to slide upward and overlap the pinned hero
+          scrub: 1, // Smooth synchronization with Lenis scrolling
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         });
+
+        // Ensure ScrollTrigger refreshes when hero background image finishes loading
+        if (bgImageRef.current) {
+          if (bgImageRef.current.complete) {
+            ScrollTrigger.refresh();
+          } else {
+            bgImageRef.current.addEventListener(
+              'load',
+              () => {
+                ScrollTrigger.refresh();
+              },
+              { once: true }
+            );
+          }
+        }
       }
     }, containerRef);
 
@@ -117,7 +139,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
     <section
       id="welcome"
       ref={containerRef}
-      className="sticky top-0 z-0 w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center"
+      className="relative z-10 w-full h-[100svh] min-h-[680px] overflow-hidden select-none flex items-center justify-center"
       aria-label="Diwali Welcome Hero"
     >
       {/* 1. Fullscreen Cinematic Background Edge-to-Edge */}
@@ -141,7 +163,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 3. Center Storytelling Hero Content (Completely stationary during scroll) */}
       <div
         ref={contentRef}
-        className="relative z-20 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12"
+        className="relative z-30 max-w-3xl mx-auto px-6 sm:px-10 text-center flex flex-col items-center justify-center pt-8 pb-12"
       >
         {/* Eyebrow: A FESTIVAL OF LIGHTS */}
         <div className="hero-eyebrow flex items-center justify-center space-x-3 mb-5">
@@ -175,7 +197,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
         {/* Refined Luxury Editorial CTA */}
         <div className="hero-cta flex items-center justify-center">
           <button
-            onClick={onBeginJourney}
+            onClick={() => {
+              if (!soundscape.getIsPlaying()) {
+                soundscape.playBgm();
+              }
+              onBeginJourney();
+            }}
             className="group relative inline-flex items-center space-x-3 px-8 py-3.5 rounded-full border border-[#E98EAF]/50 bg-[#061116]/60 backdrop-blur-sm text-[#F3EAE2] font-medium text-xs sm:text-sm uppercase tracking-[0.22em] transition-all duration-300 hover:border-[#E98EAF] hover:bg-[#E98EAF]/15 focus:outline-none"
           >
             <span>Begin the Journey</span>
@@ -189,7 +216,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 4. Terrace Diya anchored to courtyard foreground */}
       <div
         ref={diyaWrapperRef}
-        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-20 flex flex-col items-center"
+        className="hero-diya-callout absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-14 lg:left-20 z-30 flex flex-col items-center"
       >
         <DiyaFlame
           isLit={diyaLit}
@@ -205,7 +232,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
       {/* 5. Minimalist Editorial Scroll Cue */}
       <button
         onClick={onBeginJourney}
-        className="absolute bottom-6 right-8 sm:right-12 z-20 hidden md:flex items-center space-x-2 text-[10px] tracking-[0.28em] uppercase text-[#A99BBF]/70 hover:text-[#F3EAE2] transition-colors focus:outline-none font-light"
+        className="absolute bottom-6 right-8 sm:right-12 z-30 hidden md:flex items-center space-x-2 text-[10px] tracking-[0.28em] uppercase text-[#A99BBF]/70 hover:text-[#F3EAE2] transition-colors focus:outline-none font-light"
       >
         <span>Scroll to Explore</span>
         <span>↓</span>

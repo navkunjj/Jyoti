@@ -20,8 +20,7 @@ export const LeftChapterNav: React.FC<LeftChapterNavProps> = ({
   const chapters: ChapterItem[] = [
     { id: 'welcome', num: '01', label: 'Welcome' },
     { id: 'celebration', num: '02', label: 'Stories' },
-    { id: 'across-india', num: '03', label: 'Across India' },
-    { id: 'wishes', num: '04', label: 'Wishes' },
+    { id: 'wishes', num: '03', label: 'Wishes' },
   ];
 
   useEffect(() => {

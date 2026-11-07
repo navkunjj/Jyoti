@@ -18,19 +18,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
       setScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    const unsubscribe = soundscape.subscribe((playing) => {
+      setIsPlayingAudio(playing);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      unsubscribe();
+    };
   }, []);
 
   const toggleSound = () => {
-    const playing = soundscape.toggle();
-    setIsPlayingAudio(playing);
+    soundscape.toggle();
   };
 
   const navLinks = [
     { id: 'welcome', label: 'Home' },
     { id: 'celebration', label: 'Stories' },
-    { id: 'across-india', label: 'Across India' },
     { id: 'wishes', label: 'Wishes' },
+    { id: 'light-the-world', label: 'Light the World' },
   ];
 
   return (
@@ -92,8 +99,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
                   ? 'border-[#E98EAF]/70 text-[#F4C4D2] bg-[#E98EAF]/10'
                   : 'border-[#A99BBF]/20 text-[#A99BBF] hover:text-[#F3EAE2] hover:border-[#A99BBF]/50'
               }`}
-              title={isPlayingAudio ? 'Mute ambient soundscape' : 'Play meditative soundscape'}
-              aria-label={isPlayingAudio ? 'Mute soundscape' : 'Play soundscape'}
+              title={isPlayingAudio ? 'Mute Diwali background music' : 'Play Diwali background music'}
+              aria-label={isPlayingAudio ? 'Mute background music' : 'Play background music'}
             >
               {isPlayingAudio ? (
                 <Volume2 className="w-4 h-4 text-[#E98EAF]" />

@@ -177,20 +177,7 @@ export function setupScrollFireworks(): () => void {
     );
   }
 
-  // 3. Across India Section
-  const indiaEl = document.getElementById('across-india');
-  if (indiaEl) {
-    triggers.push(
-      ScrollTrigger.create({
-        trigger: indiaEl,
-        start: 'top 55%',
-        onEnter: () => triggerRegionFireworks(0),
-        onEnterBack: () => triggerRegionFireworks(1),
-      })
-    );
-  }
-
-  // 4. Wishes Section
+  // 3. Wishes Section
   const wishEl = document.getElementById('wishes');
   if (wishEl) {
     triggers.push(

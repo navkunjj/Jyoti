@@ -1,7 +1,21 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth bg-[#061116] text-[#F3EAE2]">
+<html lang="en" class="bg-[#061116] text-[#F3EAE2]">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Force page reload to always start from the home page (top)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      window.scrollTo(0, 0);
+
+      window.addEventListener('beforeunload', function () {
+        window.scrollTo(0, 0);
+      });
+    </script>
     <link rel="icon" type="image/png" href="/assets/jyoti-favicon.png" />
     <link rel="apple-touch-icon" href="/assets/jyoti-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

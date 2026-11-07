@@ -5,6 +5,7 @@ import { DiyaLogo } from '../UI/DiyaLogo';
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
   onHeightChange?: (height: number) => void;
+  isFixed?: boolean;
 }
 
 // Clean Lucide-compatible SVG icons for brand socials
@@ -41,7 +42,11 @@ const LinkedinIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' 
   </svg>
 );
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) => {
+export const Footer: React.FC<FooterProps> = ({
+  onNavigate,
+  onHeightChange,
+  isFixed = false,
+}) => {
   const footerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -73,9 +78,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
     <footer
       id="site-footer"
       ref={footerRef}
-      className="fixed bottom-0 left-0 right-0 z-0 w-full bg-[#040C10] text-white py-10 sm:py-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden font-sans not-italic"
+      className={`${
+        isFixed
+          ? 'fixed bottom-0 left-0 right-0 z-[5]'
+          : 'relative z-20 border-t border-white/10'
+      } w-full bg-[#040C10] text-white py-10 sm:py-12 px-6 sm:px-12 lg:px-20 select-none overflow-hidden font-sans not-italic`}
     >
-      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-6">
+      <div className="max-w-7xl mx-auto w-full relative z-30 space-y-6">
         {/* Main Row: Brand, Navigation & Back to Top */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
           {/* Brand & Tagline with Diya Logo */}
@@ -110,16 +119,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onHeightChange }) =>
               Stories
             </button>
             <button
-              onClick={() => onNavigate('across-india')}
-              className="hover:text-white transition-colors focus:outline-none"
-            >
-              Across India
-            </button>
-            <button
               onClick={() => onNavigate('wishes')}
               className="hover:text-white transition-colors focus:outline-none"
             >
               Wishes
+            </button>
+            <button
+              onClick={() => onNavigate('light-the-world')}
+              className="hover:text-[#FFE29A] transition-colors focus:outline-none"
+            >
+              Light the World
             </button>
           </nav>
 

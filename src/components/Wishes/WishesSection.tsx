@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { InteractiveDiya } from './InteractiveDiya';
 import { WishGreetingCard } from './WishGreetingCard';
 import { DiyaLogo } from '../UI/DiyaLogo';
 
@@ -29,8 +28,8 @@ export const WishesSection: React.FC = () => {
   return (
     <section
       id="wishes"
-      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22] via-[#061116] to-[#040C10] overflow-hidden select-none"
-      aria-label="Chapter 04 Send Wishes and Blessings"
+      className="relative w-full py-28 sm:py-36 px-6 sm:px-12 lg:px-20 bg-gradient-to-b from-[#0A1B22]/80 via-[#061116]/85 to-[#040C10]/90 backdrop-blur-sm overflow-hidden select-none"
+      aria-label="Chapter 03 Send Wishes and Blessings"
     >
       {/* Sky Lanterns Animation Layer */}
       <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
@@ -78,7 +77,7 @@ export const WishesSection: React.FC = () => {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto relative z-10 space-y-20">
+      <div className="max-w-7xl mx-auto relative z-30 space-y-16 sm:space-y-20">
         {/* Sacred Shloka Header Banner */}
         <div className="text-center max-w-3xl mx-auto">
           <div className="flex items-center justify-center space-x-3 mb-4">
@@ -86,6 +85,10 @@ export const WishesSection: React.FC = () => {
             <DiyaLogo className="w-9 h-auto" glow />
             <span className="w-12 h-[1px] bg-gradient-to-l from-transparent to-[#E98EAF]" />
           </div>
+
+          <span className="text-xs uppercase tracking-[0.32em] text-[#E98EAF] font-medium block mb-4">
+            Chapter 03 · Send Wishes & Blessings
+          </span>
 
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#F3EAE2] mb-4">
             ॐ असतो मा सद्गमय ।
@@ -102,13 +105,8 @@ export const WishesSection: React.FC = () => {
           </span>
         </div>
 
-        {/* Central Interactive Diya Kindling Station */}
-        <div className="max-w-xl mx-auto">
-          <InteractiveDiya />
-        </div>
-
         {/* Custom Greeting Card & Sky Lantern Release Form */}
-        <div className="pt-8">
+        <div>
           <WishGreetingCard onReleaseLantern={handleReleaseLantern} />
         </div>
       </div>
