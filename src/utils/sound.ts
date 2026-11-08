@@ -278,6 +278,28 @@ class SoundscapeManager {
       crackleOsc.stop(crackleTime + 0.05);
     }
   }
+
+  // UI Click sound
+  public playClick() {
+    this.initAudio();
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
+    gain.gain.setValueAtTime(0.04, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.06);
+  }
+
+  public playFireworksAudio() {
+    this.playCrackerBurst();
+  }
 }
 
 export const soundscape = new SoundscapeManager();

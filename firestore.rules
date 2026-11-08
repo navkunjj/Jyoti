@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Greetings collection for Diwali Greeting Cards
+    match /greetings/{greetingId} {
+      // Anyone can read a shared greeting
+      allow read: if true;
+      
+      // Anyone can create a greeting if valid
+      allow create: if request.resource.data.keys().hasAll(['to', 'message', 'from'])
+                    && request.resource.data.to is string
+                    && request.resource.data.to.size() <= 100
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 1500
+                    && request.resource.data.from is string
+                    && request.resource.data.from.size() <= 100;
+                    
+      // Prevent modification or deletion of shared greetings
+      allow update, delete: if false;
+    }
+
+    // 2. Global statistics (diyas lit, wishes shared, participants)
+    match /stats/{statId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 3. Diyas offerings
+    match /diyas/{diyaId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // 4. General wishes collection
+    match /wishes/{wishId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+  }
+}
+

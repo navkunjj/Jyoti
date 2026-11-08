@@ -14,6 +14,9 @@ import { PersistentUserDiya } from './components/UI/PersistentUserDiya';
 import { Footer } from './components/Footer/Footer';
 import { FireworksCanvas, useScrollFireworks } from './fireworks';
 import { GlobalTwinklingLights } from './components/TwinklingLights/GlobalTwinklingLights';
+import { greetingService, GreetingCardData } from './services/greetingService';
+import { SharedGreetingView } from './components/Wishes/SharedGreetingView';
+import { DiyaLogo } from './components/UI/DiyaLogo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,15 +26,35 @@ export function App() {
   );
   const [activeChapter, setActiveChapter] = useState('welcome');
   const [footerHeight, setFooterHeight] = useState<number>(0);
+  const [sharedGreeting, setSharedGreeting] = useState<GreetingCardData | null>(null);
+  const [isLoadingGreeting, setIsLoadingGreeting] = useState<boolean>(false);
   const lenisRef = useRef<Lenis | null>(null);
 
-  // Initialize automated direction-aware scroll fireworks on homepage
+  // Automated direction-aware scroll fireworks
   useScrollFireworks();
 
-  // Listen to browser Back/Forward popstate
+  // Check for shared wish link in URL: ?wish=<id> or /wish/<id>
   useEffect(() => {
+    const checkSharedWish = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const wishId = params.get('wish') || window.location.pathname.match(/^\/wish\/([a-zA-Z0-9_-]+)/)?.[1];
+      if (wishId) {
+        setIsLoadingGreeting(true);
+        const data = await greetingService.getGreeting(wishId);
+        if (data) {
+          setSharedGreeting(data);
+        }
+        setIsLoadingGreeting(false);
+      } else {
+        setSharedGreeting(null);
+      }
+    };
+
+    checkSharedWish();
+
     const handlePopState = () => {
       setCurrentPath(window.location.pathname);
+      checkSharedWish();
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -189,12 +212,47 @@ export function App() {
       <PersistentUserDiya />
 
       {/* 1. Floating Top Navigation Bar */}
-      <Navbar
-        onNavigate={handleNavigate}
-        activeSection={isLightTheWorld ? 'light-the-world' : activeChapter}
-      />
+      {!sharedGreeting && !isLoadingGreeting && (
+        <Navbar
+          onNavigate={handleNavigate}
+          activeSection={isLightTheWorld ? 'light-the-world' : activeChapter}
+        />
+      )}
 
-      {isLightTheWorld ? (
+      {isLoadingGreeting ? (
+        <div className="relative z-50 min-h-screen bg-[#061116] flex flex-col items-center justify-center space-y-4">
+          <DiyaLogo className="w-12 h-auto" glow />
+          <span className="font-serif text-[#FFE29A] text-lg italic tracking-wide">
+            Unfolding your Diwali greeting...
+          </span>
+        </div>
+      ) : sharedGreeting ? (
+        <div className="relative z-50 min-h-screen bg-transparent">
+          <SharedGreetingView
+            greeting={sharedGreeting}
+            onCreateOwnWish={() => {
+              setSharedGreeting(null);
+              window.history.pushState({}, '', '/');
+              setCurrentPath('/');
+              setTimeout(() => {
+                const target = document.getElementById('wishes');
+                if (target) {
+                  if (lenisRef.current) {
+                    lenisRef.current.scrollTo(target, { offset: 0, duration: 1.4 });
+                  } else {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }
+              }, 150);
+            }}
+            onNavigateHome={() => {
+              setSharedGreeting(null);
+              window.history.pushState({}, '', '/');
+              setCurrentPath('/');
+            }}
+          />
+        </div>
+      ) : isLightTheWorld ? (
         /* Standalone "Light the World" Page */
         <div className="relative z-10 flex flex-col min-h-screen bg-transparent">
           <main className="flex-1">
@@ -214,7 +272,10 @@ export function App() {
           {/* 3. Main Storytelling Chapters (The Page that slides up) */}
           <main className="relative z-10 shadow-[0_35px_90px_rgba(0,0,0,0.98)] border-b border-white/10">
             {/* Chapter 01 — Welcome Hero */}
-            <HeroSection onBeginJourney={() => handleNavigate('celebration')} />
+            <HeroSection
+              onBeginJourney={() => handleNavigate('celebration')}
+              onCreateGreeting={() => handleNavigate('wishes')}
+            />
 
             {/* Chapter 02 — Stories & Sacred Rituals */}
             <CelebrationSection />

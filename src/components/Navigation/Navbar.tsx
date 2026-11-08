@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DiyaLogo } from '../UI/DiyaLogo';
-import { Volume2, VolumeX, Menu, X } from 'lucide-react';
+import { Volume2, VolumeX, Menu, X, Sparkles } from 'lucide-react';
 import { soundscape } from '../../utils/sound';
 
 interface NavbarProps {
@@ -90,8 +90,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeSection }) => 
             })}
           </nav>
 
-          {/* Minimal Unobtrusive Audio Control */}
-          <div className="hidden sm:flex items-center">
+          {/* Right Actions: Create Greeting CTA & Audio Control */}
+          <div className="hidden sm:flex items-center space-x-3">
+            <button
+              onClick={() => onNavigate('wishes')}
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full border border-[#FDB863]/40 bg-[#FDB863]/10 hover:bg-[#FDB863]/20 text-[#FFE29A] text-[11px] uppercase tracking-wider transition-all duration-300 focus:outline-none"
+            >
+              <Sparkles className="w-3 h-3 text-[#FDB863]" />
+              <span>Create Greeting</span>
+            </button>
+
             <button
               onClick={toggleSound}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border focus:outline-none ${

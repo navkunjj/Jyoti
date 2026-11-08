@@ -6,14 +6,16 @@ import { FloatingPetals } from './FloatingPetals';
 import { DiyaFlame } from '../UI/DiyaFlame';
 import { soundscape } from '../../utils/sound';
 import { fireworks } from '../../fireworks';
+import { Sparkles } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface HeroSectionProps {
   onBeginJourney: () => void;
+  onCreateGreeting?: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney, onCreateGreeting }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -194,8 +196,30 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
           Discover the traditions, stories, and colors of Diwali — a festival that lights up India with hope, togetherness, and new beginnings.
         </p>
 
-        {/* Refined Luxury Editorial CTA */}
-        <div className="hero-cta flex items-center justify-center">
+        {/* Refined Luxury Editorial CTAs */}
+        <div className="hero-cta flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          {/* 1. Create Greeting Card Button (Redirects to Wishes section) */}
+          <button
+            onClick={() => {
+              if (!soundscape.getIsPlaying()) {
+                soundscape.playBgm();
+              }
+              if (onCreateGreeting) {
+                onCreateGreeting();
+              } else {
+                onBeginJourney();
+              }
+            }}
+            className="group relative inline-flex items-center space-x-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#FDB863] to-[#FFE29A] hover:brightness-110 text-[#1A0A00] font-semibold text-xs sm:text-sm uppercase tracking-[0.2em] shadow-[0_4px_25px_rgba(253,184,99,0.35)] transition-all duration-300 focus:outline-none"
+          >
+            <Sparkles className="w-4 h-4 text-[#1A0A00]" />
+            <span>Create Greeting</span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1 font-semibold">
+              →
+            </span>
+          </button>
+
+          {/* 2. Begin the Journey Button */}
           <button
             onClick={() => {
               if (!soundscape.getIsPlaying()) {
@@ -203,11 +227,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBeginJourney }) => {
               }
               onBeginJourney();
             }}
-            className="group relative inline-flex items-center space-x-3 px-8 py-3.5 rounded-full border border-[#E98EAF]/50 bg-[#061116]/60 backdrop-blur-sm text-[#F3EAE2] font-medium text-xs sm:text-sm uppercase tracking-[0.22em] transition-all duration-300 hover:border-[#E98EAF] hover:bg-[#E98EAF]/15 focus:outline-none"
+            className="group relative inline-flex items-center space-x-2.5 px-7 py-3.5 rounded-full border border-[#E98EAF]/50 bg-[#061116]/60 backdrop-blur-sm text-[#F3EAE2] font-medium text-xs sm:text-sm uppercase tracking-[0.22em] transition-all duration-300 hover:border-[#E98EAF] hover:bg-[#E98EAF]/15 focus:outline-none"
           >
             <span>Begin the Journey</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-1.5 font-light">
-              →
+            <span className="transition-transform duration-300 group-hover:translate-y-0.5 font-light">
+              ↓
             </span>
           </button>
         </div>
