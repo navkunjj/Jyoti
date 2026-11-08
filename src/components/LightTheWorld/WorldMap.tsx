@@ -3,22 +3,20 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import countriesAtlas from 'world-atlas/countries-110m.json';
 import { CountryStats, diyaService } from '../../services/diyaService';
-
-interface Particle {
-  x: number;
-  y: number;
-  lng: number;
-  lat: number;
-  countryId: string;
-  radius: number;
-  phase: number;
-  speed: number;
-  color: string;
-}
+import { detectUserLocation, UserLocation } from '../../services/geoService';
 
 interface WorldMapProps {
   onSelectCountry?: (country: CountryStats) => void;
   selectedCountryId?: string | null;
+}
+
+interface StaticLightPoint {
+  id: string;
+  name: string;
+  code: string;
+  diyas: number;
+  x: number;
+  y: number;
 }
 
 export const WorldMap: React.FC<WorldMapProps> = ({
@@ -27,10 +25,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [hoveredCountry, setHoveredCountry] = useState<CountryStats | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [countriesList, setCountriesList] = useState<CountryStats[]>(() => diyaService.getCountries());
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: 1100,
     height: 560,
@@ -38,24 +37,54 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
   const transformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
-  const animFrameRef = useRef<number | null>(null);
 
-  // 1. Process GeoJSON features from TopoJSON
-  const { geoData, countriesFeatureMap } = useMemo(() => {
+  // 1. Detect user's location from public IP
+  useEffect(() => {
+    let isMounted = true;
+    detectUserLocation().then((loc) => {
+      if (isMounted && loc) {
+        setUserLocation(loc);
+        // Automatically default country selection to user's country if none selected
+        if (!selectedCountryId && onSelectCountry) {
+          const matchedCountry = diyaService.getCountryById(loc.countryId);
+          if (matchedCountry) {
+            onSelectCountry(matchedCountry);
+          }
+        }
+      }
+    }).catch((err) => {
+      console.warn('Location detection fallback:', err);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCountryId, onSelectCountry]);
+
+  // 2. Subscribe to real-time Firestore diya updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setCountriesList(diyaService.getCountries());
+    };
+    const unsub = diyaService.subscribe(handleUpdate);
+    window.addEventListener('jyoti:diya-updated', handleUpdate);
+
+    return () => {
+      unsub();
+      window.removeEventListener('jyoti:diya-updated', handleUpdate);
+    };
+  }, []);
+
+  // 3. Process GeoJSON features from TopoJSON
+  const { geoData } = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const atlas = countriesAtlas as any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const countries = topojson.feature(atlas, atlas.objects.countries) as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = new Map<string, any>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    countries.features.forEach((f: any) => {
-      map.set(String(f.id), f);
-    });
-    return { geoData: countries, countriesFeatureMap: map };
+    return { geoData: countries };
   }, []);
 
-  // 2. Setup D3 Projection & Path Generator (Natural Earth)
+  // 4. Setup D3 Projection & Path Generator (Natural Earth)
   const projection = useMemo(() => {
     return d3
       .geoNaturalEarth1()
@@ -67,73 +96,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     return d3.geoPath().projection(projection);
   }, [projection]);
 
-  // 3. Generate distributed Diya particles inside countries
-  const particles = useMemo(() => {
-    const list: Particle[] = [];
-    const countryStatsList = diyaService.getCountries();
-
-    countryStatsList.forEach((stat) => {
-      const feat = countriesFeatureMap.get(stat.id);
-      if (!feat) return;
-
-      const bounds = d3.geoBounds(feat);
-      const [[minLng, minLat], [maxLng, maxLat]] = bounds;
-
-      // Realistic particle density
-      let pointCount = Math.min(130, Math.max(3, Math.floor(Math.sqrt(stat.diyas) * 0.17)));
-      if (stat.id === '356') pointCount = 180; // India
-
-      let accepted = 0;
-      let attempts = 0;
-      const maxAttempts = pointCount * 8;
-
-      while (accepted < pointCount && attempts < maxAttempts) {
-        attempts++;
-        const testLng = minLng + Math.random() * (maxLng - minLng);
-        const testLat = minLat + Math.random() * (maxLat - minLat);
-
-        if (d3.geoContains(feat, [testLng, testLat])) {
-          const projected = projection([testLng, testLat]);
-          if (projected) {
-            list.push({
-              x: projected[0],
-              y: projected[1],
-              lng: testLng,
-              lat: testLat,
-              countryId: stat.id,
-              radius: Math.random() * 1.3 + 0.9,
-              phase: Math.random() * Math.PI * 2,
-              speed: Math.random() * 1.5 + 0.7,
-              color: Math.random() > 0.4 ? '#FDB863' : '#FFE29A',
-            });
-            accepted++;
-          }
-        }
-      }
-
-      if (accepted === 0) {
-        const centroid = d3.geoCentroid(feat);
-        const projected = projection(centroid);
-        if (projected) {
-          list.push({
-            x: projected[0],
-            y: projected[1],
-            lng: centroid[0],
-            lat: centroid[1],
-            countryId: stat.id,
-            radius: 1.4,
-            phase: 0,
-            speed: 1.1,
-            color: '#FDB863',
-          });
-        }
-      }
-    });
-
-    return list;
-  }, [countriesFeatureMap, projection]);
-
-  // 4. Handle resize
+  // 5. Handle responsive dimensions
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -147,52 +110,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // 5. Canvas Animation Loop for 60fps glowing Diya lights
-  const renderCanvas = useCallback(
-    (transform: d3.ZoomTransform) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = dimensions.width * dpr;
-      canvas.height = dimensions.height * dpr;
-      ctx.scale(dpr, dpr);
-
-      ctx.clearRect(0, 0, dimensions.width, dimensions.height);
-
-      ctx.save();
-      ctx.translate(transform.x, transform.y);
-      ctx.scale(transform.k, transform.k);
-
-      const time = performance.now() * 0.0018;
-
-      particles.forEach((p) => {
-        const opacity = 0.35 + 0.55 * Math.sin(time * p.speed + p.phase);
-        const currentRadius = p.radius * (0.85 + 0.25 * Math.sin(time * p.speed * 1.4 + p.phase));
-
-        // Soft outer ambient halo
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, currentRadius * 2.6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(253, 184, 99, ${opacity * 0.28})`;
-        ctx.fill();
-
-        // Inner glowing core
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = '#FDB863';
-        ctx.shadowBlur = 4;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      });
-
-      ctx.restore();
-    },
-    [dimensions.width, dimensions.height, particles]
-  );
 
   // 6. Setup D3 Zoom on SVG
   useEffect(() => {
@@ -218,26 +135,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       d3.select(svg).on('.zoom', null);
     };
   }, [dimensions.width, dimensions.height]);
-
-  // 7. Continuous Animation Frame for Canvas Particles
-  useEffect(() => {
-    let active = true;
-
-    const loop = () => {
-      if (!active) return;
-      renderCanvas(transformRef.current);
-      animFrameRef.current = requestAnimationFrame(loop);
-    };
-
-    loop();
-
-    return () => {
-      active = false;
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [renderCanvas]);
 
   const handleZoomIn = () => {
     if (svgRef.current && zoomBehaviorRef.current) {
@@ -296,6 +193,43 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     }
   };
 
+  // 7. Strictly Real Light Locations — Each real light location appears as one static, clearly visible glowing dot
+  const staticRealLights: StaticLightPoint[] = useMemo(() => {
+    const points: StaticLightPoint[] = [];
+
+    countriesList.forEach((country) => {
+      // Only countries with actual stored lights (> 0)
+      if (country.diyas > 0) {
+        const projected = projection([country.lng, country.lat]);
+        if (projected) {
+          points.push({
+            id: country.id,
+            name: country.name,
+            code: country.code,
+            diyas: country.diyas,
+            x: projected[0],
+            y: projected[1],
+          });
+        }
+      }
+    });
+
+    return points;
+  }, [countriesList, projection]);
+
+  // 8. Projected User "YOU" Pin Location
+  const userPinCoords = useMemo(() => {
+    if (!userLocation) return null;
+    const projected = projection([userLocation.lng, userLocation.lat]);
+    if (!projected) return null;
+    return {
+      x: projected[0],
+      y: projected[1],
+      country: userLocation.country,
+      code: userLocation.countryCode,
+    };
+  }, [userLocation, projection]);
+
   return (
     <div
       ref={containerRef}
@@ -305,13 +239,36 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       {/* Background subtle radial wash */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(40,16,42,0.4)_0%,rgba(14,4,16,0)_75%)]" />
 
-      {/* SVG Vector Country Layer */}
+      {/* Main SVG Vector Layer (Countries, Static Lights, and the "YOU" Pin) */}
       <svg
         ref={svgRef}
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         className="w-full h-full cursor-grab active:cursor-grabbing block"
         style={{ height: `${dimensions.height}px` }}
       >
+        <defs>
+          {/* Static, high-clarity halo glow for real lit locations */}
+          <radialGradient id="staticDiyaHalo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFE29A" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#FDB863" stopOpacity="0.65" />
+            <stop offset="70%" stopColor="#FF9800" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#FF9800" stopOpacity="0" />
+          </radialGradient>
+
+          {/* User Location Distinctive Beacon Gradient */}
+          <radialGradient id="userBeaconHalo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
+            <stop offset="30%" stopColor="#FFD182" stopOpacity="0.85" />
+            <stop offset="65%" stopColor="#FF8833" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#FF8833" stopOpacity="0" />
+          </radialGradient>
+
+          {/* Soft shadow for YOU badge */}
+          <filter id="youBadgeShadow" x="-25%" y="-25%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.75" />
+          </filter>
+        </defs>
+
         <g className="map-group">
           {/* Delicate hairline graticules */}
           <path
@@ -327,6 +284,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
             const id = String(feature.id);
             const isHovered = hoveredCountry?.id === id;
             const isSelected = selectedCountryId === id;
+            const isUserCountry = userLocation?.countryId === id;
 
             return (
               <path
@@ -335,19 +293,23 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                 className="transition-colors duration-200 cursor-pointer"
                 fill={
                   isSelected
-                    ? '#301332'
+                    ? '#341538'
+                    : isUserCountry
+                    ? '#29112d'
                     : isHovered
-                    ? '#250f28'
+                    ? '#220d25'
                     : '#150917'
                 }
                 stroke={
                   isSelected
                     ? '#FFE29A'
+                    : isUserCountry
+                    ? 'rgba(253, 184, 99, 0.75)'
                     : isHovered
                     ? 'rgba(255, 226, 154, 0.6)'
                     : 'rgba(255, 255, 255, 0.08)'
                 }
-                strokeWidth={isSelected ? 1.2 : isHovered ? 0.9 : 0.45}
+                strokeWidth={isSelected ? 1.3 : isUserCountry ? 1.0 : isHovered ? 0.9 : 0.45}
                 onMouseEnter={(e) => handleCountryHover(e, feature)}
                 onMouseMove={(e) => handleCountryHover(e, feature)}
                 onMouseLeave={handleCountryLeave}
@@ -355,15 +317,112 @@ export const WorldMap: React.FC<WorldMapProps> = ({
               />
             );
           })}
+
+          {/* ─── STATIC, CLEARLY VISIBLE GLOWING DOTS FOR REAL LIGHT LOCATIONS ─── */}
+          {/* No repeatedly blinking or flickering effects: solid, crisp, luminous lights */}
+          {staticRealLights.map((light) => (
+            <g key={`light-${light.id}`} className="pointer-events-none">
+              {/* Outer static halo */}
+              <circle
+                cx={light.x}
+                cy={light.y}
+                r={6.5}
+                fill="url(#staticDiyaHalo)"
+              />
+              {/* Mid luminous ring */}
+              <circle
+                cx={light.x}
+                cy={light.y}
+                r={3.2}
+                fill="#FDB863"
+                opacity="0.9"
+              />
+              {/* Brilliant core spark */}
+              <circle
+                cx={light.x}
+                cy={light.y}
+                r={1.5}
+                fill="#FFFFFF"
+                opacity="1"
+              />
+            </g>
+          ))}
+
+          {/* ─── USER LOCATION PIN & "YOU" BADGE ─── */}
+          {userPinCoords && (
+            <g
+              className="pointer-events-none"
+              transform={`translate(${userPinCoords.x}, ${userPinCoords.y})`}
+            >
+              {/* Outer soft radiant aura */}
+              <circle
+                cx={0}
+                cy={0}
+                r={16}
+                fill="url(#userBeaconHalo)"
+                opacity="0.45"
+              />
+
+              {/* Distinctive golden beacon ring */}
+              <circle
+                cx={0}
+                cy={0}
+                r={7.5}
+                fill="rgba(255, 136, 51, 0.25)"
+                stroke="#FFE29A"
+                strokeWidth="1.6"
+              />
+
+              {/* Incandescent pinpoint center */}
+              <circle
+                cx={0}
+                cy={0}
+                r={3.5}
+                fill="#FF8833"
+              />
+              <circle
+                cx={0}
+                cy={0}
+                r={1.8}
+                fill="#FFFFFF"
+              />
+
+              {/* Floating "YOU" Marker Badge */}
+              <g transform="translate(0, -20)" filter="url(#youBadgeShadow)">
+                {/* Badge Container */}
+                <rect
+                  x={-20}
+                  y={-17}
+                  width={40}
+                  height={17}
+                  rx={8.5}
+                  fill="#FDB863"
+                  stroke="#FFF2CC"
+                  strokeWidth="1"
+                />
+                {/* Pointer Tip */}
+                <polygon
+                  points="-4,-0.5 4,-0.5 0,3.5"
+                  fill="#FDB863"
+                />
+                {/* Bold "YOU" Text */}
+                <text
+                  x={0}
+                  y={-5}
+                  textAnchor="middle"
+                  fill="#150818"
+                  fontSize="9.5"
+                  fontWeight="800"
+                  letterSpacing="0.14em"
+                  fontFamily="Inter, system-ui, sans-serif"
+                >
+                  YOU
+                </text>
+              </g>
+            </g>
+          )}
         </g>
       </svg>
-
-      {/* Canvas Layer for 2,000+ Twinkling Diya Lights */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none"
-        style={{ width: '100%', height: `${dimensions.height}px` }}
-      />
 
       {/* Minimalist Micro-Typographic Map Controls */}
       <div className="absolute top-6 right-6 sm:top-8 sm:right-8 flex items-center space-x-2 z-20">
@@ -396,13 +455,26 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
       {/* Editorial Micro Caption at Bottom Left */}
       <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20 pointer-events-none">
-        <div className="flex items-center space-x-3 text-[11px] tracking-widest uppercase text-[#9E8D9F] font-sans">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#FDB863] shadow-[0_0_6px_#FDB863]" />
-          <span>Cartography of Living Flames</span>
-          <span className="text-white/20">/</span>
-          <span className="font-mono text-[10px] text-[#A898A7]">
-            {particles.length.toLocaleString()} points lit
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 text-[11px] tracking-widest uppercase text-[#9E8D9F] font-sans">
+          <div className="flex items-center space-x-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FDB863] shadow-[0_0_6px_#FDB863]" />
+            <span>Living Cartography</span>
+            <span className="text-white/20">/</span>
+            <span className="font-mono text-[10px] text-[#A898A7]">
+              {staticRealLights.length > 0
+                ? `${staticRealLights.length} ${staticRealLights.length === 1 ? 'nation' : 'nations'} active`
+                : 'Awaiting offerings'}
+            </span>
+          </div>
+
+          {userLocation && (
+            <div className="flex items-center space-x-2 text-[#FFE29A]">
+              <span className="text-white/20 hidden sm:inline">·</span>
+              <span className="text-[10px] uppercase font-mono tracking-wider">
+                Pinned: {userLocation.country} ({userLocation.countryCode})
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -423,12 +495,19 @@ export const WorldMap: React.FC<WorldMapProps> = ({
               <span className="text-[10px] tracking-widest text-[#9E8D9F] uppercase font-mono">
                 {hoveredCountry.code}
               </span>
+              {userLocation?.countryId === hoveredCountry.id && (
+                <span className="text-[9px] bg-[#FDB863] text-[#140716] font-bold px-1 py-0.2 rounded font-sans tracking-wide">
+                  YOU
+                </span>
+              )}
             </div>
             <div className="mt-0.5 text-xs text-[#E6DACF] font-sans">
               <span className="font-serif italic text-sm text-[#FDB863] mr-1">
                 {hoveredCountry.diyas.toLocaleString()}
               </span>
-              <span className="text-[11px] text-[#9E8D9F]">diyas kindled</span>
+              <span className="text-[11px] text-[#9E8D9F]">
+                {hoveredCountry.diyas === 1 ? 'diya kindled' : 'diyas kindled'}
+              </span>
             </div>
           </div>
         </div>

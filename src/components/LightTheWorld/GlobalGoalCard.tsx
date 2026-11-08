@@ -63,8 +63,8 @@ export const GlobalGoalCard: React.FC<GlobalGoalCardProps> = ({
       });
     }
 
-    setTimeout(() => {
-      const res = diyaService.lightDiya(selectedCountryId);
+    setTimeout(async () => {
+      const res = await diyaService.lightDiya(selectedCountryId);
       setIsLighting(false);
       if (res.success && onDiyaLitSuccess) {
         onDiyaLitSuccess();

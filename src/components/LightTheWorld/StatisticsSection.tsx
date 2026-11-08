@@ -93,9 +93,11 @@ export const StatisticsSection: React.FC = () => {
             >
               {stats.countriesCount}
             </span>
-            <span className="font-serif text-3xl text-[#9E8D9F] font-light">
-              +
-            </span>
+            {stats.countriesCount > 0 && (
+              <span className="font-serif text-3xl text-[#9E8D9F] font-light">
+                +
+              </span>
+            )}
           </div>
           <div className="text-sm font-serif italic text-[#ECE0D4]">
             Participating Nations
