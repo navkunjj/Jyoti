@@ -6,6 +6,7 @@ interface FooterProps {
   onNavigate: (sectionId: string) => void;
   onHeightChange?: (height: number) => void;
   isFixed?: boolean;
+  onScrollToTop?: () => void;
 }
 
 // Clean Lucide-compatible SVG icons for brand socials
@@ -46,6 +47,7 @@ export const Footer: React.FC<FooterProps> = ({
   onNavigate,
   onHeightChange,
   isFixed = false,
+  onScrollToTop,
 }) => {
   const footerRef = useRef<HTMLElement | null>(null);
 
@@ -71,6 +73,18 @@ export const Footer: React.FC<FooterProps> = ({
   }, [onHeightChange]);
 
   const scrollToTop = () => {
+    if (onScrollToTop) {
+      onScrollToTop();
+      return;
+    }
+
+    // If on a different page (non-homepage, e.g. /light-the-world or isFixed is false), scroll to the top of this page
+    if (!isFixed || (typeof window !== 'undefined' && window.location.pathname !== '/')) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // On the homepage, navigate to the welcome section (start of the app)
     onNavigate('welcome');
   };
 

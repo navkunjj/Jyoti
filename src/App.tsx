@@ -170,6 +170,15 @@ export function App() {
       window.history.pushState({}, '', '/');
       setCurrentPath('/');
       setTimeout(() => {
+        if (destination === 'welcome') {
+          setActiveChapter('welcome');
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo(0, { duration: 1.4 });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          return;
+        }
         const target = document.getElementById(destination);
         if (target) {
           if (lenisRef.current) {
@@ -179,6 +188,16 @@ export function App() {
           }
         }
       }, 150);
+      return;
+    }
+
+    if (destination === 'welcome') {
+      setActiveChapter('welcome');
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 1.4 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 
@@ -258,7 +277,13 @@ export function App() {
           <main className="flex-1">
             <LightTheWorldPage onNavigateHome={() => handleNavigate('welcome')} />
           </main>
-          <Footer onNavigate={handleNavigate} isFixed={false} />
+          <Footer
+            onNavigate={handleNavigate}
+            isFixed={false}
+            onScrollToTop={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         </div>
       ) : (
         /* Original Homepage Experience */
@@ -292,7 +317,19 @@ export function App() {
           />
 
           {/* 4. Stuck Footer (Fixed at the bottom underneath the sliding page) */}
-          <Footer onNavigate={handleNavigate} onHeightChange={setFooterHeight} isFixed={true} />
+          <Footer
+            onNavigate={handleNavigate}
+            onHeightChange={setFooterHeight}
+            isFixed={true}
+            onScrollToTop={() => {
+              setActiveChapter('welcome');
+              if (lenisRef.current) {
+                lenisRef.current.scrollTo(0, { duration: 1.4 });
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+          />
         </>
       )}
     </div>
