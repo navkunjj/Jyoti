@@ -12,6 +12,7 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "d3": "^7.9.2",
+    "firebase": "^13.2.0",
     "gsap": "^3.12.7",
     "lenis": "^1.1.20",
     "lucide-react": "^1.16.0",

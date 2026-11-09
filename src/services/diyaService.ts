@@ -13,6 +13,8 @@ import {
   query,
   orderBy,
   limit,
+  Timestamp,
+  FieldValue,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -47,8 +49,7 @@ export interface RecentDiya {
   countryName: string;
   lat?: number;
   lng?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestamp?: any;
+  timestamp?: Timestamp | FieldValue | null;
   clientTimestamp: string;
 }
 

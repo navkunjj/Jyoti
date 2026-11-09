@@ -1,12 +1,22 @@
 import { db } from '../firebase';
-import { collection, addDoc, doc, getDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  setDoc,
+  increment,
+  serverTimestamp,
+  Timestamp,
+  FieldValue,
+} from 'firebase/firestore';
 
 export interface GreetingCardData {
   id?: string;
   to: string;
   message: string;
   from: string;
-  createdAt?: any;
+  createdAt?: Timestamp | FieldValue | null;
 }
 
 export const greetingService = {
