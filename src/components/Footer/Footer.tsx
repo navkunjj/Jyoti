@@ -161,7 +161,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="flex flex-col md:flex-row items-center justify-between text-xs text-white/60 gap-4 font-sans font-normal pt-1">
           {/* Creator Attribution */}
           <div className="flex items-center space-x-2">
-            <span>© {new Date().getFullYear()} JYOTI</span>
+            <span>JYOTI</span>
             <span className="text-white/30">•</span>
             <span>Made by NAV</span>
           </div>
