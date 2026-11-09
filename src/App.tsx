@@ -14,6 +14,7 @@ import { PersistentUserDiya } from './components/UI/PersistentUserDiya';
 import { Footer } from './components/Footer/Footer';
 import { FireworksCanvas, useScrollFireworks } from './fireworks';
 import { GlobalTwinklingLights } from './components/TwinklingLights/GlobalTwinklingLights';
+import { SkyLanternsCanvas } from './components/SkyLanterns/SkyLanternsCanvas';
 import { greetingService, GreetingCardData } from './services/greetingService';
 import { SharedGreetingView } from './components/Wishes/SharedGreetingView';
 import { DiyaLogo } from './components/UI/DiyaLogo';
@@ -229,6 +230,11 @@ export function App() {
 
       {/* Floating Glowing Diya Badge at Bottom-Right — Visible across all pages once lit */}
       <PersistentUserDiya />
+
+      {/* Cinematic Traditional Glowing Paper Sky Lanterns Journey */}
+      {!sharedGreeting && !isLoadingGreeting && (
+        <SkyLanternsCanvas />
+      )}
 
       {/* 1. Floating Top Navigation Bar */}
       {!sharedGreeting && !isLoadingGreeting && (

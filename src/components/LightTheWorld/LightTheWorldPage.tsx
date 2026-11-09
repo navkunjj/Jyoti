@@ -71,8 +71,6 @@ export const LightTheWorldPage: React.FC<LightTheWorldPageProps> = ({ onNavigate
         <header className="space-y-8 max-w-5xl">
           <div className="ltw-label flex items-center space-x-3 text-xs uppercase tracking-widest text-[#9E8D9F] font-sans">
             <span className="w-1.5 h-1.5 rounded-full bg-[#FDB863]" />
-            <span>Universal Communion</span>
-            <span className="text-white/20">/</span>
             <span>Diwali 2026</span>
           </div>
 
